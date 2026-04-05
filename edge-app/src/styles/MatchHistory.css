@@ -1,0 +1,75 @@
+.match-history-page {
+    min-height: 100vh;
+    padding: 24px;
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    color: white;
+    box-sizing: border-box;
+  }
+  
+  .match-history-header {
+    margin-bottom: 24px;
+  }
+  
+  .match-history-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  .match-history-header p {
+    margin-top: 8px;
+    font-size: 1rem;
+    opacity: 0.85;
+  }
+  
+  .match-history-message {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    padding: 18px;
+    font-size: 1rem;
+  }
+  
+  .match-history-message.error {
+    border-color: rgba(255, 90, 90, 0.4);
+    background: rgba(255, 90, 90, 0.08);
+  }
+  
+  .match-history-table-wrapper {
+    overflow-x: auto;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+  }
+  
+  .match-history-table {
+    width: 100%;
+    min-width: 1200px;
+    border-collapse: collapse;
+  }
+  
+  .match-history-table thead tr {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .match-history-table th,
+  .match-history-table td {
+    padding: 14px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  
+  .match-history-table th {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  
+  .match-history-table td {
+    font-size: 0.93rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .match-history-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
