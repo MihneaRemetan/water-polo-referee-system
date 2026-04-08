@@ -86,7 +86,7 @@ INSERT INTO referee (id, name, city, gender, referee_rank, password) VALUES
 (66, 'KOVACS ADRIENN', 'TG. MURES', 'Feminin', 'National (CJ)', 'MUR_66'),
 
 -- ALTE ORAȘE (6)
-(67, 'REMEŢAN MIHNEA', 'ARAD', 'Masculin', 'National (STO)', 'ARA_67'),
+(67, 'REMETAN MIHNEA', 'ARAD', 'Masculin', 'National (STO)', 'ARA_67'),
 (68, 'SOFRONICIU COSMIN', 'ARAD', 'Masculin', 'National (CJ)', 'ARA_68'),
 (69, 'IACOB DIANA MARIA', 'ALBA IULIA', 'Feminin', 'National (CJ)', 'ALB_69'),
 (70, 'PETER SZABOLCS', 'BRASOV', 'Masculin', 'National (CJ)', 'BRA_70'),
@@ -113,4 +113,4 @@ INSERT INTO observer (id, name, city, gender, observer_rank, password) VALUES
 (204, 'FLORIAN DUMITRACHE', 'BUCURESTI', 'Masculin', 'Membru', 'OBS_204'),
 (205, 'RAZVAN IONESCU', 'ARAD', 'Masculin', 'Membru', 'OBS_205'),
 (206, 'NICOLAE DIACONU', 'BUCURESTI', 'Masculin', 'Membru', 'OBS_206'),
-(207, 'RADU MATACHE', 'BUCURESTI', 'Masculin', 'Membru', 'OBS_207'),
+(207, 'RADU MATACHE', 'BUCURESTI', 'Masculin', 'Membru', 'OBS_207');

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -43,13 +44,20 @@ public class AdminController {
 
     @GetMapping("/referees")
     public List<Referee> getAllReferees() {
-        return refereeRepository.findAll();
+        return refereeRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(Referee::getId))
+                .toList();
     }
 
     @PostMapping("/referees")
     public ResponseEntity<?> createReferee(@RequestBody Referee referee) {
         if (referee.getId() == null) {
             return ResponseEntity.badRequest().body("Referee ID is required.");
+        }
+
+        if (referee.getName() == null || referee.getName().isBlank()) {
+            return ResponseEntity.badRequest().body("Referee name is required.");
         }
 
         if (referee.getPassword() == null || referee.getPassword().isBlank()) {
@@ -122,13 +130,20 @@ public class AdminController {
 
     @GetMapping("/observers")
     public List<Observer> getAllObservers() {
-        return observerRepository.findAll();
+        return observerRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(Observer::getId))
+                .toList();
     }
 
     @PostMapping("/observers")
     public ResponseEntity<?> createObserver(@RequestBody Observer observer) {
         if (observer.getId() == null) {
             return ResponseEntity.badRequest().body("Observer ID is required.");
+        }
+
+        if (observer.getName() == null || observer.getName().isBlank()) {
+            return ResponseEntity.badRequest().body("Observer name is required.");
         }
 
         if (observer.getPassword() == null || observer.getPassword().isBlank()) {
