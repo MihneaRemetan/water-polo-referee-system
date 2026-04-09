@@ -74,19 +74,21 @@ public class MatchService {
             double goalsPerMatch = matchesPlayed == 0 ? 0.0 : (double) totalGoals / matchesPlayed;
             double foulsPerMatch = matchesPlayed == 0 ? 0.0 : (double) totalFouls / matchesPlayed;
 
-            result.add(new PlayerStatisticsDto(
-                    first.getPlayerName(),
-                    first.getTeam(),
-                    first.getPlayerNumber(),
-                    matchesPlayed,
-                    totalGoals,
-                    totalFouls,
-                    totalYellow,
-                    totalRed,
-                    totalExclusions,
-                    goalsPerMatch,
-                    foulsPerMatch
-            ));
+            if (totalGoals > 0) {
+                result.add(new PlayerStatisticsDto(
+                        first.getPlayerName(),
+                        first.getTeam(),
+                        first.getPlayerNumber(),
+                        matchesPlayed,
+                        totalGoals,
+                        totalFouls,
+                        totalYellow,
+                        totalRed,
+                        totalExclusions,
+                        goalsPerMatch,
+                        foulsPerMatch
+                ));
+            }
         }
 
         result.sort(

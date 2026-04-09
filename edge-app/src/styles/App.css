@@ -201,7 +201,7 @@ main.app-shell {
 }
 
 .topbar-logo {
-  height: 58px;
+  height: 150px;
   width: auto;
   object-fit: contain;
   display: block;
