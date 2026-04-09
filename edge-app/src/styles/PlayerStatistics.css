@@ -1,0 +1,158 @@
+.statistics-page {
+    width: 100%;
+  }
+  
+  .statistics-hero {
+    margin-bottom: 20px;
+  }
+  
+  .statistics-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 20px;
+  }
+  
+  .statistics-filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  
+  .statistics-filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  
+  .statistics-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .statistics-field label {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .statistics-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .top-scorers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .top-scorer-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  
+  .top-scorer-rank {
+    min-width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 1rem;
+    background: rgba(15, 23, 42, 0.08);
+    color: #111827;
+  }
+  
+  .top-scorer-content {
+    flex: 1;
+  }
+  
+  .top-scorer-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+  }
+  
+  .top-scorer-meta {
+    margin-top: 4px;
+    font-size: 0.92rem;
+    color: #4b5563;
+  }
+  
+  .top-scorer-goals {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #111827;
+    white-space: nowrap;
+  }
+  
+  .statistics-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .statistics-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+  }
+  
+  .statistics-table thead th {
+    text-align: left;
+    padding: 14px 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #111827;
+    border-bottom: 2px solid rgba(15, 23, 42, 0.12);
+    background: rgba(255, 255, 255, 0.75);
+  }
+  
+  .statistics-table tbody td {
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    color: #1f2937;
+    font-size: 0.95rem;
+  }
+  
+  .statistics-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.55);
+  }
+  
+  .statistics-empty {
+    padding: 24px 10px;
+    text-align: center;
+    color: #4b5563;
+    font-weight: 500;
+  }
+  
+  .statistics-error {
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+    font-weight: 600;
+  }
+  
+  @media (max-width: 1100px) {
+    .statistics-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 720px) {
+    .statistics-filter-row {
+      grid-template-columns: 1fr;
+    }
+  
+    .top-scorer-card {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }

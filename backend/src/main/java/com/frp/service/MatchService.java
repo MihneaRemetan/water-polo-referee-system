@@ -2,23 +2,109 @@ package com.frp.service;
 
 import com.frp.dto.MatchEventRequest;
 import com.frp.dto.MatchPlayerStatRequest;
+import com.frp.dto.PlayerStatisticsDto;
 import com.frp.dto.SaveMatchRequest;
 import com.frp.model.Match;
 import com.frp.model.MatchEvent;
 import com.frp.model.MatchPlayerStat;
+import com.frp.repository.MatchPlayerStatRepository;
 import com.frp.repository.MatchRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
 
     private final MatchRepository matchRepository;
+    private final MatchPlayerStatRepository matchPlayerStatRepository;
 
-    public MatchService(MatchRepository matchRepository) {
+    public MatchService(
+            MatchRepository matchRepository,
+            MatchPlayerStatRepository matchPlayerStatRepository
+    ) {
         this.matchRepository = matchRepository;
+        this.matchPlayerStatRepository = matchPlayerStatRepository;
+    }
+
+    public List<PlayerStatisticsDto> getPlayerStatistics(String name, String team, Integer playerNumber) {
+        List<MatchPlayerStat> allStats = matchPlayerStatRepository.findAll();
+
+        Map<String, List<MatchPlayerStat>> grouped = allStats.stream()
+                .filter(stat -> stat.getPlayerName() != null && !stat.getPlayerName().isBlank())
+                .filter(stat -> name == null || name.isBlank()
+                        || stat.getPlayerName().toLowerCase().contains(name.trim().toLowerCase()))
+                .filter(stat -> team == null || team.isBlank()
+                        || (stat.getTeam() != null
+                        && stat.getTeam().toLowerCase().contains(team.trim().toLowerCase())))
+                .filter(stat -> playerNumber == null
+                        || Objects.equals(stat.getPlayerNumber(), playerNumber))
+                .collect(Collectors.groupingBy(stat ->
+                        stat.getPlayerName().trim().toLowerCase() + "|"
+                                + (stat.getTeam() == null ? "" : stat.getTeam().trim().toLowerCase()) + "|"
+                                + (stat.getPlayerNumber() == null ? "" : stat.getPlayerNumber())
+                ));
+
+        List<PlayerStatisticsDto> result = new ArrayList<>();
+
+        for (List<MatchPlayerStat> stats : grouped.values()) {
+            MatchPlayerStat first = stats.get(0);
+
+            int matchesPlayed = (int) stats.stream()
+                    .map(stat -> stat.getMatch() != null ? stat.getMatch().getId() : null)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .count();
+
+            int totalGoals = stats.stream().mapToInt(stat -> safeInt(stat.getGoals())).sum();
+            int totalFouls = stats.stream().mapToInt(stat -> safeInt(stat.getFouls())).sum();
+            int totalYellow = stats.stream().mapToInt(stat -> safeInt(stat.getYellowCards())).sum();
+            int totalRed = stats.stream().mapToInt(stat -> safeInt(stat.getRedCards())).sum();
+            int totalExclusions = (int) stats.stream()
+                    .filter(stat -> Boolean.TRUE.equals(stat.getExcluded()))
+                    .count();
+
+            double goalsPerMatch = matchesPlayed == 0 ? 0.0 : (double) totalGoals / matchesPlayed;
+            double foulsPerMatch = matchesPlayed == 0 ? 0.0 : (double) totalFouls / matchesPlayed;
+
+            result.add(new PlayerStatisticsDto(
+                    first.getPlayerName(),
+                    first.getTeam(),
+                    first.getPlayerNumber(),
+                    matchesPlayed,
+                    totalGoals,
+                    totalFouls,
+                    totalYellow,
+                    totalRed,
+                    totalExclusions,
+                    goalsPerMatch,
+                    foulsPerMatch
+            ));
+        }
+
+        result.sort(
+                Comparator.comparing(
+                                PlayerStatisticsDto::getTotalGoals,
+                                Comparator.nullsFirst(Comparator.reverseOrder())
+                        )
+                        .thenComparing(
+                                PlayerStatisticsDto::getPlayerName,
+                                Comparator.nullsLast(String::compareToIgnoreCase)
+                        )
+        );
+
+        return result;
+    }
+
+    private int safeInt(Integer value) {
+        return value == null ? 0 : value;
     }
 
     @Transactional

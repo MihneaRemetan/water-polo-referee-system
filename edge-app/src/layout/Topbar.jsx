@@ -17,6 +17,7 @@ function Topbar() {
     { label: "Match Setup", path: "/match-setup" },
     { label: "Live Match", path: "/live-match" },
     { label: "Administration", path: "/admin" },
+    { label: "Statistics", path: "/statistics" },
   ];
 
   const isActive = (path) => location.pathname === path;

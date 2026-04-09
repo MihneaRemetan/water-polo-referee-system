@@ -6,6 +6,7 @@ import MatchSetup from "./pages/MatchSetup";
 import AdminPage from "./pages/AdminPage";
 import MatchHistory from "./pages/MatchHistory";
 import MatchDetails from "./pages/MatchDetails";
+import PlayerStatistics from "./pages/PlayerStatistics";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Route path="/admin" element={<AdminPage />} />
       <Route path="/history" element={<MatchHistory />} />
       <Route path="/history/:id" element={<MatchDetails />} />
+      <Route path="/statistics" element={<PlayerStatistics />} />
     </Routes>
   );
 }
