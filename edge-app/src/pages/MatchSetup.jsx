@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppLayout from "../layout/AppLayout";
 
@@ -11,8 +11,18 @@ function MatchSetup() {
       name: "",
     }));
 
+  const [teams, setTeams] = useState([]);
+
   const [teamAName, setTeamAName] = useState("");
   const [teamBName, setTeamBName] = useState("");
+
+  const [teamAId, setTeamAId] = useState(null);
+  const [teamBId, setTeamBId] = useState(null);
+
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  const teamARef = useRef(null);
+  const teamBRef = useRef(null);
 
   const [playersA, setPlayersA] = useState(createPlayers());
   const [playersB, setPlayersB] = useState(createPlayers());
@@ -44,6 +54,111 @@ function MatchSetup() {
     refereeP2: "",
     observer: "",
   });
+
+  useEffect(() => {
+    const loadTeams = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/teams");
+  
+        console.log("STATUS:", res.status);
+  
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("ERROR RESPONSE:", text);
+          return;
+        }
+  
+        const data = await res.json();
+        console.log("TEAMS:", data);
+  
+        setTeams(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("FETCH ERROR:", err);
+      }
+    };
+  
+    loadTeams();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        teamARef.current &&
+        !teamARef.current.contains(event.target) &&
+        teamBRef.current &&
+        !teamBRef.current.contains(event.target)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredTeamsA = useMemo(() => {
+    if (!teams || teams.length === 0) return [];
+  
+    const query = teamAName.trim().toLowerCase();
+  
+    if (query === "") return teams;
+  
+    return teams.filter((team) => {
+      return (
+        (team.name || "").toLowerCase().includes(query) ||
+        (team.shortName || "").toLowerCase().includes(query) ||
+        (team.city || "").toLowerCase().includes(query)
+      );
+    });
+  }, [teams, teamAName]);
+
+  const filteredTeamsB = useMemo(() => {
+    if (!teams || teams.length === 0) return [];
+
+    const query = teamAName.trim().toLowerCase();
+
+    if (query === "") return teams;
+
+    return teams.filter((team) => {
+      return (
+        (team.name || "").toLowerCase().includes(query) ||
+        (team.shortName || "").toLowerCase().includes(query) ||
+        (team.city || "").toLowerCase().includes(query)
+      );
+    });
+  }, [teams, teamBName]);
+
+  const handleSelectTeamA = (team) => {
+    setTeamAId(team.id);
+    setTeamAName(team.name);
+    setOpenDropdown(null);
+  };
+
+  const handleSelectTeamB = (team) => {
+    setTeamBId(team.id);
+    setTeamBName(team.name);
+    setOpenDropdown(null);
+  };
+
+  const handleTeamAChange = (value) => {
+    setTeamAName(value);
+
+    const exactMatch = teams.find(
+      (team) => team.name?.trim().toLowerCase() === value.trim().toLowerCase()
+    );
+
+    setTeamAId(exactMatch ? exactMatch.id : null);
+  };
+
+  const handleTeamBChange = (value) => {
+    setTeamBName(value);
+
+    const exactMatch = teams.find(
+      (team) => team.name?.trim().toLowerCase() === value.trim().toLowerCase()
+    );
+
+    setTeamBId(exactMatch ? exactMatch.id : null);
+  };
 
   const handlePlayerChange = (team, number, value) => {
     if (team === "A") {
@@ -138,14 +253,36 @@ function MatchSetup() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!teamAId) {
+      alert("Select Team A from the database.");
+      return;
+    }
+
+    if (!teamBId) {
+      alert("Select Team B from the database.");
+      return;
+    }
+
+    if (teamAId === teamBId) {
+      alert("Team A and Team B must be different.");
+      return;
+    }
+
+    const selectedTeamA = teams.find((team) => team.id === teamAId);
+    const selectedTeamB = teams.find((team) => team.id === teamBId);
+
     const formData = {
+      teamAId,
+      teamBId,
       teamA: {
-        name: teamAName.trim() || "Team A",
+        id: teamAId,
+        name: selectedTeamA?.name || "Team A",
         players: playersA,
         coaches: coachesA,
       },
       teamB: {
-        name: teamBName.trim() || "Team B",
+        id: teamBId,
+        name: selectedTeamB?.name || "Team B",
         players: playersB,
         coaches: coachesB,
       },
@@ -154,6 +291,39 @@ function MatchSetup() {
     };
 
     navigate("/live-match", { state: formData });
+  };
+
+  const dropdownStyle = {
+    position: "absolute",
+    top: "calc(100% + 8px)",
+    left: 0,
+    right: 0,
+    background: "rgba(18, 30, 58, 0.98)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "18px",
+    boxShadow: "0 14px 30px rgba(0,0,0,0.35)",
+    zIndex: 50,
+    maxHeight: "260px",
+    overflowY: "auto",
+    backdropFilter: "blur(10px)",
+  };
+
+  const optionStyle = {
+    padding: "14px 16px",
+    cursor: "pointer",
+    borderBottom: "1px solid rgba(255,255,255,0.05)",
+  };
+
+  const optionTitleStyle = {
+    color: "#ffffff",
+    fontWeight: 700,
+    fontSize: "15px",
+    marginBottom: "4px",
+  };
+
+  const optionMetaStyle = {
+    color: "rgba(255,255,255,0.68)",
+    fontSize: "13px",
   };
 
   return (
@@ -207,14 +377,48 @@ function MatchSetup() {
               <div className="team-badge a">A</div>
             </div>
 
-            <input
-              type="text"
-              value={teamAName}
-              onChange={(e) => setTeamAName(e.target.value)}
-              placeholder="Team A name"
-              className="app-input"
-              style={{ marginBottom: "16px" }}
-            />
+            <div
+              ref={teamARef}
+              style={{ position: "relative", marginBottom: "16px" }}
+            >
+              <input
+                type="text"
+                value={teamAName}
+                onChange={(e) => handleTeamAChange(e.target.value)}
+                onFocus={() => setOpenDropdown("A")}
+                placeholder="Search and select Team A"
+                className="app-input"
+                autoComplete="off"
+              />
+
+              {openDropdown === "A" && (
+                <div style={dropdownStyle}>
+                  {filteredTeamsA.length > 0 ? (
+                    filteredTeamsA.map((team) => (
+                      <div
+                        key={team.id}
+                        style={optionStyle}
+                        onMouseDown={() => handleSelectTeamA(team)}
+                      >
+                        <div style={optionTitleStyle}>{team.name}</div>
+                        <div style={optionMetaStyle}>
+                          {team.shortName || "—"} • {team.city || "Unknown city"}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        color: "rgba(255,255,255,0.68)",
+                      }}
+                    >
+                      No teams found.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {playersA.map((player) => (
               <div key={player.number} className="player-row">
@@ -310,14 +514,48 @@ function MatchSetup() {
               <div className="team-badge b">B</div>
             </div>
 
-            <input
-              type="text"
-              value={teamBName}
-              onChange={(e) => setTeamBName(e.target.value)}
-              placeholder="Team B name"
-              className="app-input"
-              style={{ marginBottom: "16px" }}
-            />
+            <div
+              ref={teamBRef}
+              style={{ position: "relative", marginBottom: "16px" }}
+            >
+              <input
+                type="text"
+                value={teamBName}
+                onChange={(e) => handleTeamBChange(e.target.value)}
+                onFocus={() => setOpenDropdown("B")}
+                placeholder="Search and select Team B"
+                className="app-input"
+                autoComplete="off"
+              />
+
+              {openDropdown === "B" && (
+                <div style={dropdownStyle}>
+                  {filteredTeamsB.length > 0 ? (
+                    filteredTeamsB.map((team) => (
+                      <div
+                        key={team.id}
+                        style={optionStyle}
+                        onMouseDown={() => handleSelectTeamB(team)}
+                      >
+                        <div style={optionTitleStyle}>{team.name}</div>
+                        <div style={optionMetaStyle}>
+                          {team.shortName || "—"} • {team.city || "Unknown city"}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        color: "rgba(255,255,255,0.68)",
+                      }}
+                    >
+                      No teams found.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {playersB.map((player) => (
               <div key={player.number} className="player-row">

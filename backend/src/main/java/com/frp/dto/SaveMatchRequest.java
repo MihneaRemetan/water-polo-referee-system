@@ -4,8 +4,8 @@ import java.util.List;
 
 public class SaveMatchRequest {
 
-    private String teamAName;
-    private String teamBName;
+    private Long teamAId;
+    private Long teamBId;
 
     private Integer scoreA;
     private Integer scoreB;
@@ -27,20 +27,20 @@ public class SaveMatchRequest {
     public SaveMatchRequest() {
     }
 
-    public String getTeamAName() {
-        return teamAName;
+    public Long getTeamAId() {
+        return teamAId;
     }
 
-    public void setTeamAName(String teamAName) {
-        this.teamAName = teamAName;
+    public void setTeamAId(Long teamAId) {
+        this.teamAId = teamAId;
     }
 
-    public String getTeamBName() {
-        return teamBName;
+    public Long getTeamBId() {
+        return teamBId;
     }
 
-    public void setTeamBName(String teamBName) {
-        this.teamBName = teamBName;
+    public void setTeamBId(Long teamBId) {
+        this.teamBId = teamBId;
     }
 
     public Integer getScoreA() {

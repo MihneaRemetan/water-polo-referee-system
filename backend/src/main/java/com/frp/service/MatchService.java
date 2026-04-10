@@ -7,8 +7,10 @@ import com.frp.dto.SaveMatchRequest;
 import com.frp.model.Match;
 import com.frp.model.MatchEvent;
 import com.frp.model.MatchPlayerStat;
+import com.frp.model.Team;
 import com.frp.repository.MatchPlayerStatRepository;
 import com.frp.repository.MatchRepository;
+import com.frp.repository.TeamRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +27,16 @@ public class MatchService {
 
     private final MatchRepository matchRepository;
     private final MatchPlayerStatRepository matchPlayerStatRepository;
+    private final TeamRepository teamRepository;
 
     public MatchService(
             MatchRepository matchRepository,
-            MatchPlayerStatRepository matchPlayerStatRepository
+            MatchPlayerStatRepository matchPlayerStatRepository,
+            TeamRepository teamRepository
     ) {
         this.matchRepository = matchRepository;
         this.matchPlayerStatRepository = matchPlayerStatRepository;
+        this.teamRepository = teamRepository;
     }
 
     public List<PlayerStatisticsDto> getPlayerStatistics(String name, String team, Integer playerNumber) {
@@ -111,10 +116,28 @@ public class MatchService {
 
     @Transactional
     public Match saveMatch(SaveMatchRequest request) {
+        if (request.getTeamAId() == null) {
+            throw new RuntimeException("Team A is required");
+        }
+
+        if (request.getTeamBId() == null) {
+            throw new RuntimeException("Team B is required");
+        }
+
+        Team teamA = teamRepository.findById(request.getTeamAId())
+                .orElseThrow(() -> new RuntimeException("Team A not found"));
+
+        Team teamB = teamRepository.findById(request.getTeamBId())
+                .orElseThrow(() -> new RuntimeException("Team B not found"));
+
+        if (teamA.getId().equals(teamB.getId())) {
+            throw new RuntimeException("A team cannot play against itself");
+        }
+
         Match match = new Match();
 
-        match.setTeamAName(request.getTeamAName());
-        match.setTeamBName(request.getTeamBName());
+        match.setTeamA(teamA);
+        match.setTeamB(teamB);
         match.setScoreA(request.getScoreA());
         match.setScoreB(request.getScoreB());
         match.setPeriod(request.getPeriod());

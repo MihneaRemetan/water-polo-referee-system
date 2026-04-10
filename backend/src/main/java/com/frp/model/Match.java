@@ -1,5 +1,6 @@
 package com.frp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,11 +14,15 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "team_a_name", nullable = false)
-    private String teamAName;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_a_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Team teamA;
 
-    @Column(name = "team_b_name", nullable = false)
-    private String teamBName;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_b_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Team teamB;
 
     @Column(name = "score_a")
     private Integer scoreA;
@@ -59,20 +64,40 @@ public class Match {
         return id;
     }
 
+    public Team getTeamA() {
+        return teamA;
+    }
+
+    public void setTeamA(Team teamA) {
+        this.teamA = teamA;
+    }
+
+    public Team getTeamB() {
+        return teamB;
+    }
+
+    public void setTeamB(Team teamB) {
+        this.teamB = teamB;
+    }
+
+    @Transient
     public String getTeamAName() {
-        return teamAName;
+        return teamA != null ? teamA.getName() : null;
     }
 
-    public void setTeamAName(String teamAName) {
-        this.teamAName = teamAName;
-    }
-
+    @Transient
     public String getTeamBName() {
-        return teamBName;
+        return teamB != null ? teamB.getName() : null;
     }
 
-    public void setTeamBName(String teamBName) {
-        this.teamBName = teamBName;
+    @Transient
+    public String getTeamAShortName() {
+        return teamA != null ? teamA.getShortName() : null;
+    }
+
+    @Transient
+    public String getTeamBShortName() {
+        return teamB != null ? teamB.getShortName() : null;
     }
 
     public Integer getScoreA() {
