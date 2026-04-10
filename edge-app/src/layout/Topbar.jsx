@@ -13,7 +13,7 @@ function Topbar() {
   const userRole = localStorage.getItem("userRole") || "Referee";
 
   const navItems = [
-    { label: "Home", path: "/" },
+    { label: "Home", path: "/home" },
     { label: "Match Setup", path: "/match-setup" },
     { label: "Live Match", path: "/live-match" },
     { label: "Administration", path: "/admin" },
