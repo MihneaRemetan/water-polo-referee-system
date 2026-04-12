@@ -86,7 +86,7 @@ main.app-shell {
 
 .section-subtitle {
   margin: 0 0 18px;
-  color: var(--muted);
+  color: white;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -385,7 +385,7 @@ main.app-shell {
 .live-card-subtitle {
   margin: 6px 0 0;
   font-size: 13px;
-  color: var(--muted);
+  color: white;
 }
 
 .info-chip {

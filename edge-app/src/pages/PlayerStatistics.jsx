@@ -136,6 +136,8 @@ function PlayerStatistics() {
                   <input
                     id="searchPlayerNumber"
                     type="number"
+                    min="1"
+                    max="15"
                     value={searchPlayerNumber}
                     onChange={(e) => setSearchPlayerNumber(e.target.value)}
                     placeholder="e.g. 7"

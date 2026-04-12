@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ScoreBoard from "../components/ScoreBoard";
 import Timer from "../components/Timer";
@@ -88,18 +88,45 @@ function LiveMatch() {
   const MAX_TIME = periodMinutes * 60;
 
   const formatEventTime = (secondsValue = matchSeconds) => {
-    const minutes = Math.floor(secondsValue / 60);
-    const seconds = secondsValue % 60;
+    const safeSeconds = Math.max(0, Number(secondsValue) || 0);
+    const minutes = Math.floor(safeSeconds / 60);
+    const seconds = safeSeconds % 60;
 
     return `${minutes.toString().padStart(2, "0")}:${seconds
       .toString()
       .padStart(2, "0")}`;
   };
 
-  const addEvent = (message, customSeconds = matchSeconds) => {
-    const timeLabel = formatEventTime(customSeconds);
-    setEvents((prev) => [...prev, `[${timeLabel}] ${message}`]);
+  const addEvent = ({
+    team = null,
+    playerNumber = null,
+    playerName = null,
+    eventType = "MATCH_EVENT",
+    details,
+    customSeconds = matchSeconds,
+    customPeriod = period,
+  }) => {
+    setEvents((prev) => [
+      ...prev,
+      {
+        team,
+        playerNumber,
+        playerName,
+        eventType,
+        eventTimeSeconds: customSeconds,
+        period: customPeriod,
+        details,
+      },
+    ]);
   };
+
+  const eventListItems = useMemo(
+    () =>
+      events.map(
+        (event) => `[${formatEventTime(event.eventTimeSeconds)}] ${event.details}`
+      ),
+    [events]
+  );
 
   const getPlayerLabel = (player) => {
     const cleanName = player?.name?.trim();
@@ -118,18 +145,18 @@ function LiveMatch() {
         redCards: player.redCards ?? 0,
         excluded: player.out ?? false,
       }));
-  
+
     const mapEvents = (eventsList) =>
-      eventsList.map((eventText) => ({
-        team: null,
-        playerNumber: null,
-        playerName: null,
-        eventType: "MATCH_EVENT",
-        eventTimeSeconds: matchSeconds,
-        period,
-        details: eventText,
+      eventsList.map((event) => ({
+        team: event.team,
+        playerNumber: event.playerNumber,
+        playerName: event.playerName,
+        eventType: event.eventType,
+        eventTimeSeconds: event.eventTimeSeconds,
+        period: event.period,
+        details: event.details,
       }));
-  
+
     return {
       teamAId: resolvedTeamAId,
       teamBId: resolvedTeamBId,
@@ -202,10 +229,11 @@ function LiveMatch() {
       setMatchSeconds((prev) => {
         if (prev <= 1) {
           setIsMatchRunning(false);
-          setEvents((oldEvents) => [
-            ...oldEvents,
-            `[00:00] End of period ${period}`,
-          ]);
+          addEvent({
+            eventType: "PERIOD_END",
+            details: `End of period ${period}`,
+            customSeconds: 0,
+          });
           return 0;
         }
         return prev - 1;
@@ -272,12 +300,18 @@ function LiveMatch() {
     setPeriodMinutes(safeMinutes);
     setIsMatchRunning(false);
     setMatchSeconds(safeMinutes * 60);
-    addEvent(`Period duration set to ${safeMinutes} minutes`);
+    addEvent({
+      eventType: "PERIOD_DURATION_CHANGE",
+      details: `Period duration set to ${safeMinutes} minutes`,
+    });
   };
 
   const handleIncreasePeriod = () => {
     if (period >= 4) {
-      addEvent("Cannot go beyond period 4");
+      addEvent({
+        eventType: "SYSTEM_WARNING",
+        details: "Cannot go beyond period 4",
+      });
       return;
     }
 
@@ -287,12 +321,18 @@ function LiveMatch() {
     setMatchSeconds(periodMinutes * 60);
     setShotClockSeconds(28);
     setFirstPossession("");
-    addEvent(`Moved to period ${nextPeriod}`);
+    addEvent({
+      eventType: "PERIOD_CHANGE",
+      details: `Moved to period ${nextPeriod}`,
+    });
   };
 
   const handleDecreasePeriod = () => {
     if (period <= 1) {
-      addEvent("Cannot go below period 1");
+      addEvent({
+        eventType: "SYSTEM_WARNING",
+        details: "Cannot go below period 1",
+      });
       return;
     }
 
@@ -302,41 +342,68 @@ function LiveMatch() {
     setMatchSeconds(periodMinutes * 60);
     setShotClockSeconds(28);
     setFirstPossession("");
-    addEvent(`Moved back to period ${nextPeriod}`);
+    addEvent({
+      eventType: "PERIOD_CHANGE",
+      details: `Moved back to period ${nextPeriod}`,
+    });
   };
 
   const handleTimeoutA = () => {
     if (timeoutsA >= 2) {
-      addEvent(`${teamA} cannot request more than 2 timeouts`);
+      addEvent({
+        team: "A",
+        eventType: "TIMEOUT_DENIED",
+        details: `${teamA} cannot request more than 2 timeouts`,
+      });
       return;
     }
 
     setTimeoutsA((prev) => prev + 1);
-    addEvent(`Timeout ${teamA}`);
+    addEvent({
+      team: "A",
+      eventType: "TIMEOUT",
+      details: `Timeout ${teamA}`,
+    });
     setIsMatchRunning(false);
   };
 
   const handleTimeoutB = () => {
     if (timeoutsB >= 2) {
-      addEvent(`${teamB} cannot request more than 2 timeouts`);
+      addEvent({
+        team: "B",
+        eventType: "TIMEOUT_DENIED",
+        details: `${teamB} cannot request more than 2 timeouts`,
+      });
       return;
     }
 
     setTimeoutsB((prev) => prev + 1);
-    addEvent(`Timeout ${teamB}`);
+    addEvent({
+      team: "B",
+      eventType: "TIMEOUT",
+      details: `Timeout ${teamB}`,
+    });
     setIsMatchRunning(false);
   };
 
   const handleFirstPossessionA = () => {
     if (firstPossession) return;
     setFirstPossession(teamA);
-    addEvent(`Period ${period} - Sprint won by ${teamA}`);
+    addEvent({
+      team: "A",
+      eventType: "SPRINT_WIN",
+      details: `Period ${period} - Sprint won by ${teamA}`,
+    });
   };
 
   const handleFirstPossessionB = () => {
     if (firstPossession) return;
     setFirstPossession(teamB);
-    addEvent(`Period ${period} - Sprint won by ${teamB}`);
+    addEvent({
+      team: "B",
+      eventType: "SPRINT_WIN",
+      details: `Period ${period} - Sprint won by ${teamB}`,
+    });
   };
 
   const handlePlayerFoulA = (playerNumber) => {
@@ -358,15 +425,23 @@ function LiveMatch() {
     if (!player) return;
 
     if (player.fouls >= 3) {
-      addEvent(
-        `${teamA} - Player ${getPlayerLabel(
+      addEvent({
+        team: "A",
+        playerNumber: player.number,
+        playerName: player.name || null,
+        eventType: "FOUL_OUT",
+        details: `${teamA} - Player ${getPlayerLabel(
           player
-        )} received 3 personal fouls and is out`
-      );
+        )} received 3 personal fouls and is out`,
+      });
     } else {
-      addEvent(
-        `${teamA} - Player ${getPlayerLabel(player)} elimination (${player.fouls}/3)`
-      );
+      addEvent({
+        team: "A",
+        playerNumber: player.number,
+        playerName: player.name || null,
+        eventType: "FOUL",
+        details: `${teamA} - Player ${getPlayerLabel(player)} elimination (${player.fouls}/3)`,
+      });
     }
   };
 
@@ -389,15 +464,23 @@ function LiveMatch() {
     if (!player) return;
 
     if (player.fouls >= 3) {
-      addEvent(
-        `${teamB} - Player ${getPlayerLabel(
+      addEvent({
+        team: "B",
+        playerNumber: player.number,
+        playerName: player.name || null,
+        eventType: "FOUL_OUT",
+        details: `${teamB} - Player ${getPlayerLabel(
           player
-        )} received 3 personal fouls and is out`
-      );
+        )} received 3 personal fouls and is out`,
+      });
     } else {
-      addEvent(
-        `${teamB} - Player ${getPlayerLabel(player)} elimination (${player.fouls}/3)`
-      );
+      addEvent({
+        team: "B",
+        playerNumber: player.number,
+        playerName: player.name || null,
+        eventType: "FOUL",
+        details: `${teamB} - Player ${getPlayerLabel(player)} elimination (${player.fouls}/3)`,
+      });
     }
   };
 
@@ -419,7 +502,13 @@ function LiveMatch() {
     const player = updatedPlayers.find((p) => p.number === playerNumber);
     if (!player) return;
 
-    addEvent(`${teamA} - Player ${getPlayerLabel(player)} elimination removed`);
+    addEvent({
+      team: "A",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "FOUL_REMOVED",
+      details: `${teamA} - Player ${getPlayerLabel(player)} elimination removed`,
+    });
   };
 
   const handleRemoveFoulB = (playerNumber) => {
@@ -440,7 +529,13 @@ function LiveMatch() {
     const player = updatedPlayers.find((p) => p.number === playerNumber);
     if (!player) return;
 
-    addEvent(`${teamB} - Player ${getPlayerLabel(player)} elimination removed`);
+    addEvent({
+      team: "B",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "FOUL_REMOVED",
+      details: `${teamB} - Player ${getPlayerLabel(player)} elimination removed`,
+    });
   };
 
   const handleAddGoalA = (playerNumber) => {
@@ -465,7 +560,13 @@ function LiveMatch() {
     setPlayersA(updatedPlayers);
     setScoreA((prev) => prev + 1);
     setShotClockSeconds(28);
-    addEvent(`${teamA} - Goal scored by ${getPlayerLabel(scorer)}`);
+    addEvent({
+      team: "A",
+      playerNumber: scorer.number,
+      playerName: scorer.name || null,
+      eventType: "GOAL",
+      details: `${teamA} - Goal scored by ${getPlayerLabel(scorer)}`,
+    });
   };
 
   const handleAddGoalB = (playerNumber) => {
@@ -490,7 +591,13 @@ function LiveMatch() {
     setPlayersB(updatedPlayers);
     setScoreB((prev) => prev + 1);
     setShotClockSeconds(28);
-    addEvent(`${teamB} - Goal scored by ${getPlayerLabel(scorer)}`);
+    addEvent({
+      team: "B",
+      playerNumber: scorer.number,
+      playerName: scorer.name || null,
+      eventType: "GOAL",
+      details: `${teamB} - Goal scored by ${getPlayerLabel(scorer)}`,
+    });
   };
 
   const handleRemoveGoalA = (playerNumber) => {
@@ -510,7 +617,13 @@ function LiveMatch() {
 
     setPlayersA(updatedPlayers);
     setScoreA((prev) => Math.max(0, prev - 1));
-    addEvent(`${teamA} - Goal removed from ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "A",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "GOAL_REMOVED",
+      details: `${teamA} - Goal removed from ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleRemoveGoalB = (playerNumber) => {
@@ -530,7 +643,13 @@ function LiveMatch() {
 
     setPlayersB(updatedPlayers);
     setScoreB((prev) => Math.max(0, prev - 1));
-    addEvent(`${teamB} - Goal removed from ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "B",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "GOAL_REMOVED",
+      details: `${teamB} - Goal removed from ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleAddYellowA = (playerNumber) => {
@@ -557,7 +676,13 @@ function LiveMatch() {
     });
 
     setPlayersA(updatedPlayers);
-    addEvent(`${teamA} - Yellow card for ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "A",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "YELLOW_CARD",
+      details: `${teamA} - Yellow card for ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleAddYellowB = (playerNumber) => {
@@ -584,7 +709,13 @@ function LiveMatch() {
     });
 
     setPlayersB(updatedPlayers);
-    addEvent(`${teamB} - Yellow card for ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "B",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "YELLOW_CARD",
+      details: `${teamB} - Yellow card for ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleRemoveYellowA = (playerNumber) => {
@@ -602,7 +733,13 @@ function LiveMatch() {
     });
 
     setPlayersA(updatedPlayers);
-    addEvent(`${teamA} - Yellow card removed from ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "A",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "YELLOW_CARD_REMOVED",
+      details: `${teamA} - Yellow card removed from ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleRemoveYellowB = (playerNumber) => {
@@ -620,7 +757,13 @@ function LiveMatch() {
     });
 
     setPlayersB(updatedPlayers);
-    addEvent(`${teamB} - Yellow card removed from ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "B",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "YELLOW_CARD_REMOVED",
+      details: `${teamB} - Yellow card removed from ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleAddRedA = (playerNumber) => {
@@ -639,7 +782,13 @@ function LiveMatch() {
     });
 
     setPlayersA(updatedPlayers);
-    addEvent(`${teamA} - Red card for ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "A",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "RED_CARD",
+      details: `${teamA} - Red card for ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleAddRedB = (playerNumber) => {
@@ -658,7 +807,13 @@ function LiveMatch() {
     });
 
     setPlayersB(updatedPlayers);
-    addEvent(`${teamB} - Red card for ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "B",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "RED_CARD",
+      details: `${teamB} - Red card for ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleRemoveRedA = (playerNumber) => {
@@ -677,7 +832,13 @@ function LiveMatch() {
     });
 
     setPlayersA(updatedPlayers);
-    addEvent(`${teamA} - Red card removed from ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "A",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "RED_CARD_REMOVED",
+      details: `${teamA} - Red card removed from ${getPlayerLabel(player)}`,
+    });
   };
 
   const handleRemoveRedB = (playerNumber) => {
@@ -696,7 +857,13 @@ function LiveMatch() {
     });
 
     setPlayersB(updatedPlayers);
-    addEvent(`${teamB} - Red card removed from ${getPlayerLabel(player)}`);
+    addEvent({
+      team: "B",
+      playerNumber: player.number,
+      playerName: player.name || null,
+      eventType: "RED_CARD_REMOVED",
+      details: `${teamB} - Red card removed from ${getPlayerLabel(player)}`,
+    });
   };
 
   return (
@@ -902,7 +1069,7 @@ function LiveMatch() {
             </button>
           </div>
 
-          <EventList events={events} />
+          <EventList events={eventListItems} />
         </div>
 
         <div className="live-side-column">
