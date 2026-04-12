@@ -6,6 +6,7 @@ import com.frp.repository.MatchRepository;
 import com.frp.service.MatchService;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,8 +36,11 @@ public class MatchController {
     }
 
     @PostMapping
-    public ResponseEntity<Match> saveMatch(@RequestBody SaveMatchRequest request) {
-        Match savedMatch = matchService.saveMatch(request);
+    public ResponseEntity<Match> saveMatch(
+            @RequestBody SaveMatchRequest request,
+            Authentication authentication
+    ) {
+        Match savedMatch = matchService.saveMatch(request, authentication);
         return ResponseEntity.ok(savedMatch);
     }
 }

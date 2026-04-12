@@ -44,7 +44,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers("/api/teams/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/matches/**").permitAll()
+                        .requestMatchers("/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
                         .requestMatchers(HttpMethod.GET, "/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
 
                         .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")

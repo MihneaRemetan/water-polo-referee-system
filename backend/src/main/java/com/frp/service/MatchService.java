@@ -13,6 +13,7 @@ import com.frp.repository.MatchRepository;
 import com.frp.repository.TeamRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -115,7 +116,7 @@ public class MatchService {
     }
 
     @Transactional
-    public Match saveMatch(SaveMatchRequest request) {
+    public Match saveMatch(SaveMatchRequest request, Authentication authentication) {
         if (request.getTeamAId() == null) {
             throw new RuntimeException("Team A is required");
         }
@@ -133,6 +134,12 @@ public class MatchService {
         if (teamA.getId().equals(teamB.getId())) {
             throw new RuntimeException("A team cannot play against itself");
         }
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String userId = authentication.getName();
 
         Match match = new Match();
 
@@ -153,7 +160,11 @@ public class MatchService {
             match.setEndedAt(LocalDateTime.parse(request.getEndedAt()));
         }
 
-        match.setCreatedByOfficialId(request.getCreatedByOfficialId());
+        match.setCreatedByOfficialId(
+                userId != null && userId.matches("\\d+")
+                        ? Long.parseLong(userId)
+                        : null
+        );
 
         if (request.getEvents() != null) {
             for (MatchEventRequest eventRequest : request.getEvents()) {

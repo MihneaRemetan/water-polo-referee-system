@@ -130,12 +130,6 @@ function LiveMatch() {
         details: eventText,
       }));
   
-    const storedUserId = localStorage.getItem("userId");
-    const parsedOfficialId =
-      storedUserId && !Number.isNaN(Number(storedUserId))
-        ? Number(storedUserId)
-        : null;
-  
     return {
       teamAId: resolvedTeamAId,
       teamBId: resolvedTeamBId,
@@ -147,7 +141,6 @@ function LiveMatch() {
       status: "FINISHED",
       startedAt,
       endedAt: toLocalDateTimeString(new Date()),
-      createdByOfficialId: parsedOfficialId,
       events: mapEvents(events),
       playerStats: [
         ...mapPlayerStats(playersA, "A"),
