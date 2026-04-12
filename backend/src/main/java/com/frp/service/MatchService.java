@@ -1,5 +1,6 @@
 package com.frp.service;
 
+import com.frp.dto.MatchHistoryDto;
 import com.frp.dto.MatchEventRequest;
 import com.frp.dto.MatchPlayerStatRequest;
 import com.frp.dto.PlayerStatisticsDto;
@@ -198,5 +199,35 @@ public class MatchService {
         }
 
         return matchRepository.save(match);
+    }
+
+    public List<MatchHistoryDto> getMatchHistory() {
+        return matchRepository.findAllWithTeams().stream()
+                .map(match -> {
+                    String winner;
+                    if (match.getScoreA() > match.getScoreB()) {
+                        winner = match.getTeamA().getName();
+                    } else if (match.getScoreB() > match.getScoreA()) {
+                        winner = match.getTeamB().getName();
+                    } else {
+                        winner = "Draw";
+                    }
+
+                    return new MatchHistoryDto(
+                             match.getId(),
+                        match.getTeamA().getName(),
+                        match.getTeamB().getName(),
+                        match.getScoreA(),
+                        match.getScoreB(),
+                        match.getPeriod(),
+                        match.getMatchSeconds(),
+                        match.getShotClockSeconds(),
+                        match.getStatus(),
+                        match.getStartedAt(),
+                        match.getEndedAt(),
+                        match.getCreatedByOfficialId()
+                    );
+                })
+                .toList();
     }
 }

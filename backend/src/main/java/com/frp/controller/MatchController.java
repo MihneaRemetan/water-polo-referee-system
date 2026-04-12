@@ -1,5 +1,6 @@
 package com.frp.controller;
 
+import com.frp.dto.MatchHistoryDto;
 import com.frp.dto.SaveMatchRequest;
 import com.frp.model.Match;
 import com.frp.repository.MatchRepository;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/matches")
+@CrossOrigin(origins = "http://localhost:5173")
 public class MatchController {
 
     private final MatchRepository matchRepository;
@@ -35,6 +37,11 @@ public class MatchController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<List<MatchHistoryDto>> getMatchHistory() {
+        return ResponseEntity.ok(matchService.getMatchHistory());
+    }
+
     @PostMapping
     public ResponseEntity<Match> saveMatch(
             @RequestBody SaveMatchRequest request,
@@ -43,4 +50,6 @@ public class MatchController {
         Match savedMatch = matchService.saveMatch(request, authentication);
         return ResponseEntity.ok(savedMatch);
     }
+
+
 }

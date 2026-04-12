@@ -453,7 +453,7 @@ function AdminPage() {
     return (
       <AppLayout>
         <div className="panel" style={{ padding: "24px" }}>
-          Loading administration dashboard...
+          Loading officials dashboard...
         </div>
       </AppLayout>
     );
@@ -469,8 +469,8 @@ function AdminPage() {
         <section className="admin-hero panel">
           <div className="admin-hero-content">
             <div className="admin-hero-text">
-              <span className="admin-eyebrow">FRP Administration</span>
-              <h1 className="admin-title">Officials administration dashboard</h1>
+              <span className="admin-eyebrow">FRP Officials</span>
+              <h1 className="admin-title">Officials dashboard</h1>
               <p className="admin-subtitle">
                 Manage referees and observers, keep official accounts synchronized,
                 and control federation access from one place.

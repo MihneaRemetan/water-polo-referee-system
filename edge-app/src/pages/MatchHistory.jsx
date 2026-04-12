@@ -12,7 +12,7 @@ function MatchHistory() {
         setLoading(true);
         setError("");
 
-        const response = await fetch("http://localhost:8080/api/history");
+        const response = await fetch("http://localhost:8080/api/matches/history");
 
         if (!response.ok) {
           throw new Error("Failed to fetch match history");

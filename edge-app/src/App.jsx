@@ -9,6 +9,7 @@ import MatchDetails from "./pages/MatchDetails";
 import PlayerStatistics from "./pages/PlayerStatistics";
 import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PlayersPage from "./pages/PlayersPage";
 
 function App() {
   return (
@@ -81,6 +82,15 @@ function App() {
         element={
           <ProtectedRoute>
             <PlayerStatistics />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/players"
+        element={
+          <ProtectedRoute>
+            <PlayersPage />
           </ProtectedRoute>
         }
       />
