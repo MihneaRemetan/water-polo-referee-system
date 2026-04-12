@@ -32,21 +32,27 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .userDetailsService(customUserDetailsService)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
-                    .requestMatchers("/api/auth/me").authenticated()
-                    .requestMatchers("/api/teams/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                    .requestMatchers("/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
+                        .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
+                        .requestMatchers("/api/auth/me").authenticated()
 
-                    .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
-                    .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+                        .requestMatchers("/api/teams/**").permitAll()
 
-                    .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
-                    .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/matches/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
+
+                        .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
+                        .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
+
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
@@ -68,11 +74,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:3000"
-        ));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

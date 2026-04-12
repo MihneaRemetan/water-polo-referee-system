@@ -118,7 +118,7 @@ function LiveMatch() {
         redCards: player.redCards ?? 0,
         excluded: player.out ?? false,
       }));
-
+  
     const mapEvents = (eventsList) =>
       eventsList.map((eventText) => ({
         team: null,
@@ -129,7 +129,13 @@ function LiveMatch() {
         period,
         details: eventText,
       }));
-
+  
+    const storedUserId = localStorage.getItem("userId");
+    const parsedOfficialId =
+      storedUserId && !Number.isNaN(Number(storedUserId))
+        ? Number(storedUserId)
+        : null;
+  
     return {
       teamAId: resolvedTeamAId,
       teamBId: resolvedTeamBId,
@@ -141,7 +147,7 @@ function LiveMatch() {
       status: "FINISHED",
       startedAt,
       endedAt: toLocalDateTimeString(new Date()),
-      createdByOfficialId: Number(localStorage.getItem("userId") || 1),
+      createdByOfficialId: parsedOfficialId,
       events: mapEvents(events),
       playerStats: [
         ...mapPlayerStats(playersA, "A"),

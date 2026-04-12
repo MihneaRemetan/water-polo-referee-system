@@ -1,9 +1,9 @@
 package com.frp.controller;
 
+import com.frp.dto.SaveMatchRequest;
 import com.frp.model.Match;
 import com.frp.repository.MatchRepository;
 import com.frp.service.MatchService;
-import com.frp.dto.SaveMatchRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/matches")
-@CrossOrigin(origins = "http://localhost:5173")
 public class MatchController {
 
     private final MatchRepository matchRepository;
