@@ -26,8 +26,8 @@ public class MatchController {
     }
 
     @GetMapping
-    public List<Match> getAllMatches() {
-        return matchRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public ResponseEntity<List<MatchHistoryDto>> getAllMatches() {
+        return ResponseEntity.ok(matchService.getMatchHistory());
     }
 
     @GetMapping("/{id}")

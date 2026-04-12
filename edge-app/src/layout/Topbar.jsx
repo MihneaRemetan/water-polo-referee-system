@@ -19,6 +19,7 @@ function Topbar() {
     { label: "Officials", path: "/admin" },
     { label: "Statistics", path: "/statistics" },
     { label: "Players", path: "/players" },
+    { label: "Matches", path: "/history" },
   ];
 
   const isActive = (path) => location.pathname === path;
