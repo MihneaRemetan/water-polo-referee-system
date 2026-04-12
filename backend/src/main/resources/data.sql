@@ -115,9 +115,9 @@ INSERT INTO observer (id, name, city, gender, observer_rank, password) VALUES
 (206, 'NICOLAE DIACONU', 'BUCURESTI', 'Masculin', 'Membru', 'OBS_206'),
 (207, 'RADU MATACHE', 'BUCURESTI', 'Masculin', 'Membru', 'OBS_207');
 
-INSERT INTO teams (name, short_name, city) VALUES
-('CSM Oradea', 'ORA', 'Oradea'),
-('Steaua Bucuresti', 'STE', 'Bucuresti'),
-('Dinamo Bucuresti', 'DIN', 'Bucuresti'),
-('Rapid Bucuresti', 'RAP', 'Bucuresti'),
-('Politehnica Cluj', 'CLU', 'Cluj-Napoca');
+-- INSERT INTO teams (name, short_name, city) VALUES
+-- ('CSM Oradea', 'ORA', 'Oradea'),
+-- ('Steaua Bucuresti', 'STE', 'Bucuresti'),
+-- ('Dinamo Bucuresti', 'DIN', 'Bucuresti'),
+-- ('Rapid Bucuresti', 'RAP', 'Bucuresti'),
+-- ('Politehnica Cluj', 'CLU', 'Cluj-Napoca');

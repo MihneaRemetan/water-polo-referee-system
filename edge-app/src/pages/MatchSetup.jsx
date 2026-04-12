@@ -290,6 +290,7 @@ function MatchSetup() {
       officials,
     };
 
+    localStorage.setItem("matchData", JSON.stringify(formData));
     navigate("/live-match", { state: formData });
   };
 

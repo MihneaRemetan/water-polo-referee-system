@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ScoreBoard from "../components/ScoreBoard";
 import Timer from "../components/Timer";
 import EventList from "../components/EventList";
@@ -9,7 +9,14 @@ import AppLayout from "../layout/AppLayout";
 
 function LiveMatch() {
   const location = useLocation();
-  const matchData = location.state || {};
+  const navigate = useNavigate();
+
+  const storedMatchData = localStorage.getItem("matchData");
+  const matchData =
+    location.state || (storedMatchData ? JSON.parse(storedMatchData) : {});
+
+  const resolvedTeamAId = matchData.teamA?.id ?? matchData.teamAId ?? null;
+  const resolvedTeamBId = matchData.teamB?.id ?? matchData.teamBId ?? null;
 
   const toLocalDateTimeString = (date) => {
     const pad = (value) => String(value).padStart(2, "0");
@@ -124,8 +131,8 @@ function LiveMatch() {
       }));
 
     return {
-      teamAName: teamA,
-      teamBName: teamB,
+      teamAId: resolvedTeamAId,
+      teamBId: resolvedTeamBId,
       scoreA,
       scoreB,
       period,
@@ -147,7 +154,17 @@ function LiveMatch() {
     try {
       const payload = buildMatchPayload();
       console.log("Saving match payload:", payload);
-  
+
+      if (!resolvedTeamAId) {
+        alert("Could not save match.\nTeam A ID is missing.");
+        return;
+      }
+
+      if (!resolvedTeamBId) {
+        alert("Could not save match.\nTeam B ID is missing.");
+        return;
+      }
+
       const response = await fetch("http://localhost:8080/api/matches", {
         method: "POST",
         headers: {
@@ -156,21 +173,28 @@ function LiveMatch() {
         credentials: "include",
         body: JSON.stringify(payload),
       });
-  
+
       const text = await response.text();
       console.log("Save response:", response.status, text);
-  
+
       if (!response.ok) {
         alert(`Could not save match.\n${text}`);
         return;
       }
-  
+
       alert("Match saved successfully!");
     } catch (error) {
       console.error("Error saving match:", error);
       alert("Could not save match.\nCheck browser console.");
     }
   };
+
+  useEffect(() => {
+    if (!resolvedTeamAId || !resolvedTeamBId) {
+      alert("You must setup a match first.");
+      navigate("/match-setup");
+    }
+  }, [resolvedTeamAId, resolvedTeamBId, navigate]);
 
   useEffect(() => {
     if (!isMatchRunning) return;
@@ -422,13 +446,13 @@ function LiveMatch() {
 
   const handleAddGoalA = (playerNumber) => {
     const player = playersA.find((p) => p.number === playerNumber);
-  
+
     if (!player || player.out || player.fouls >= 3 || player.redCards === 1) {
       return;
     }
-  
+
     let scorer = null;
-  
+
     const updatedPlayers = playersA.map((currentPlayer) => {
       if (currentPlayer.number === playerNumber) {
         scorer = { ...currentPlayer, goals: currentPlayer.goals + 1 };
@@ -436,9 +460,9 @@ function LiveMatch() {
       }
       return currentPlayer;
     });
-  
+
     if (!scorer) return;
-  
+
     setPlayersA(updatedPlayers);
     setScoreA((prev) => prev + 1);
     setShotClockSeconds(28);
@@ -447,13 +471,13 @@ function LiveMatch() {
 
   const handleAddGoalB = (playerNumber) => {
     const player = playersB.find((p) => p.number === playerNumber);
-  
+
     if (!player || player.out || player.fouls >= 3 || player.redCards === 1) {
       return;
     }
-  
+
     let scorer = null;
-  
+
     const updatedPlayers = playersB.map((currentPlayer) => {
       if (currentPlayer.number === playerNumber) {
         scorer = { ...currentPlayer, goals: currentPlayer.goals + 1 };
@@ -461,9 +485,9 @@ function LiveMatch() {
       }
       return currentPlayer;
     });
-  
+
     if (!scorer) return;
-  
+
     setPlayersB(updatedPlayers);
     setScoreB((prev) => prev + 1);
     setShotClockSeconds(28);
@@ -512,7 +536,7 @@ function LiveMatch() {
 
   const handleAddYellowA = (playerNumber) => {
     const player = playersA.find((p) => p.number === playerNumber);
-  
+
     if (
       !player ||
       player.yellowCards === 1 ||
@@ -522,7 +546,7 @@ function LiveMatch() {
     ) {
       return;
     }
-  
+
     const updatedPlayers = playersA.map((currentPlayer) => {
       if (currentPlayer.number === playerNumber) {
         return {
@@ -532,14 +556,14 @@ function LiveMatch() {
       }
       return currentPlayer;
     });
-  
+
     setPlayersA(updatedPlayers);
     addEvent(`${teamA} - Yellow card for ${getPlayerLabel(player)}`);
   };
 
   const handleAddYellowB = (playerNumber) => {
     const player = playersB.find((p) => p.number === playerNumber);
-  
+
     if (
       !player ||
       player.yellowCards === 1 ||
@@ -549,7 +573,7 @@ function LiveMatch() {
     ) {
       return;
     }
-  
+
     const updatedPlayers = playersB.map((currentPlayer) => {
       if (currentPlayer.number === playerNumber) {
         return {
@@ -559,7 +583,7 @@ function LiveMatch() {
       }
       return currentPlayer;
     });
-  
+
     setPlayersB(updatedPlayers);
     addEvent(`${teamB} - Yellow card for ${getPlayerLabel(player)}`);
   };

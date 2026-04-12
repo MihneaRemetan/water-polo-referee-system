@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
                     .requestMatchers("/api/auth/me").authenticated()
+                    .requestMatchers("/api/teams/**").permitAll()
 
                     .requestMatchers("/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
 
