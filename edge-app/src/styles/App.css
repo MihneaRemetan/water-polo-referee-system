@@ -161,8 +161,18 @@ main.app-shell {
 
 .app-input option,
 .app-select option {
-  color: #000 !important;
-  background: #fff;
+  background: #0f1c3a;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.app-input option[value=""],
+.app-select option[value=""] {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.app-input,
+.app-select {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .card-grid {

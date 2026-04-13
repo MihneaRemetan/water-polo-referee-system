@@ -8,10 +8,12 @@ function MatchSetup() {
   const createPlayers = () =>
     Array.from({ length: 15 }, (_, index) => ({
       number: index + 1,
+      playerId: null,
       name: "",
     }));
 
   const [teams, setTeams] = useState([]);
+  const [playersFromDb, setPlayersFromDb] = useState([]);
 
   const [teamAName, setTeamAName] = useState("");
   const [teamBName, setTeamBName] = useState("");
@@ -55,39 +57,74 @@ function MatchSetup() {
     observer: "",
   });
 
+  const getPlayerTeamId = (player) => {
+    if (player?.teamId != null) return Number(player.teamId);
+    if (player?.team?.id != null) return Number(player.team.id);
+    return null;
+  };
+
+  const getPlayerName = (player) => {
+    return player?.name ?? player?.fullName ?? "";
+  };
+
+  const getPlayerNumber = (player) => {
+    return player?.number ?? player?.playerNumber ?? null;
+  };
+
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/teams");
-  
-        console.log("STATUS:", res.status);
-  
+        const res = await fetch("http://localhost:8080/api/teams", {
+          credentials: "include",
+        });
+
         if (!res.ok) {
           const text = await res.text();
-          console.error("ERROR RESPONSE:", text);
+          console.error("Could not load teams:", text);
           return;
         }
-  
+
         const data = await res.json();
-        console.log("TEAMS:", data);
-  
         setTeams(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("FETCH ERROR:", err);
+        console.error("FETCH TEAMS ERROR:", err);
       }
     };
-  
+
     loadTeams();
   }, []);
 
   useEffect(() => {
+    const loadPlayers = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/players", {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Could not load players:", text);
+          return;
+        }
+
+        const data = await res.json();
+        setPlayersFromDb(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("FETCH PLAYERS ERROR:", err);
+      }
+    };
+
+    loadPlayers();
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        teamARef.current &&
-        !teamARef.current.contains(event.target) &&
-        teamBRef.current &&
-        !teamBRef.current.contains(event.target)
-      ) {
+      const clickedOutsideTeamA =
+        teamARef.current && !teamARef.current.contains(event.target);
+      const clickedOutsideTeamB =
+        teamBRef.current && !teamBRef.current.contains(event.target);
+
+      if (clickedOutsideTeamA && clickedOutsideTeamB) {
         setOpenDropdown(null);
       }
     };
@@ -97,12 +134,11 @@ function MatchSetup() {
   }, []);
 
   const filteredTeamsA = useMemo(() => {
-    if (!teams || teams.length === 0) return [];
-  
+    if (!teams.length) return [];
+
     const query = teamAName.trim().toLowerCase();
-  
-    if (query === "") return teams;
-  
+    if (!query) return teams;
+
     return teams.filter((team) => {
       return (
         (team.name || "").toLowerCase().includes(query) ||
@@ -113,11 +149,10 @@ function MatchSetup() {
   }, [teams, teamAName]);
 
   const filteredTeamsB = useMemo(() => {
-    if (!teams || teams.length === 0) return [];
+    if (!teams.length) return [];
 
-    const query = teamAName.trim().toLowerCase();
-
-    if (query === "") return teams;
+    const query = teamBName.trim().toLowerCase();
+    if (!query) return teams;
 
     return teams.filter((team) => {
       return (
@@ -128,15 +163,56 @@ function MatchSetup() {
     });
   }, [teams, teamBName]);
 
+  const teamAPlayers = useMemo(() => {
+    return playersFromDb.filter(
+      (player) => getPlayerTeamId(player) === Number(teamAId)
+    );
+  }, [playersFromDb, teamAId]);
+
+  const teamBPlayers = useMemo(() => {
+    return playersFromDb.filter(
+      (player) => getPlayerTeamId(player) === Number(teamBId)
+    );
+  }, [playersFromDb, teamBId]);
+
+  const buildPlayersFromTeam = (teamId) => {
+    const teamPlayers = playersFromDb.filter(
+      (player) => getPlayerTeamId(player) === Number(teamId)
+    );
+
+    return Array.from({ length: 15 }, (_, index) => {
+      const rosterNumber = index + 1;
+      const matchedPlayer = teamPlayers.find(
+        (player) => Number(getPlayerNumber(player)) === rosterNumber
+      );
+
+      return {
+        number: rosterNumber,
+        playerId: matchedPlayer?.id ?? null,
+        name: getPlayerName(matchedPlayer) || "",
+      };
+    });
+  };
+
+  const getOptionsForRow = (teamPlayers, rosterNumber) => {
+    const sameNumberPlayers = teamPlayers.filter(
+      (player) => Number(getPlayerNumber(player)) === Number(rosterNumber)
+    );
+
+    return sameNumberPlayers.length > 0 ? sameNumberPlayers : teamPlayers;
+  };
+
   const handleSelectTeamA = (team) => {
     setTeamAId(team.id);
     setTeamAName(team.name);
+    setPlayersA(buildPlayersFromTeam(team.id));
     setOpenDropdown(null);
   };
 
   const handleSelectTeamB = (team) => {
     setTeamBId(team.id);
     setTeamBName(team.name);
+    setPlayersB(buildPlayersFromTeam(team.id));
     setOpenDropdown(null);
   };
 
@@ -147,7 +223,13 @@ function MatchSetup() {
       (team) => team.name?.trim().toLowerCase() === value.trim().toLowerCase()
     );
 
-    setTeamAId(exactMatch ? exactMatch.id : null);
+    if (exactMatch) {
+      setTeamAId(exactMatch.id);
+      setPlayersA(buildPlayersFromTeam(exactMatch.id));
+    } else {
+      setTeamAId(null);
+      setPlayersA(createPlayers());
+    }
   };
 
   const handleTeamBChange = (value) => {
@@ -157,23 +239,42 @@ function MatchSetup() {
       (team) => team.name?.trim().toLowerCase() === value.trim().toLowerCase()
     );
 
-    setTeamBId(exactMatch ? exactMatch.id : null);
+    if (exactMatch) {
+      setTeamBId(exactMatch.id);
+      setPlayersB(buildPlayersFromTeam(exactMatch.id));
+    } else {
+      setTeamBId(null);
+      setPlayersB(createPlayers());
+    }
   };
 
-  const handlePlayerChange = (team, number, value) => {
+  const handlePlayerSelect = (team, rosterNumber, selectedPlayerId) => {
+    const selectedId = selectedPlayerId ? Number(selectedPlayerId) : null;
+    const selectedPlayer = playersFromDb.find(
+      (player) => Number(player.id) === selectedId
+    );
+
+    const updatedValue = {
+      number: rosterNumber,
+      playerId: selectedPlayer?.id ?? null,
+      name: getPlayerName(selectedPlayer) || "",
+    };
+
     if (team === "A") {
       setPlayersA((prev) =>
         prev.map((player) =>
-          player.number === number ? { ...player, name: value } : player
+          player.number === rosterNumber ? updatedValue : player
         )
       );
     } else {
       setPlayersB((prev) =>
         prev.map((player) =>
-          player.number === number ? { ...player, name: value } : player
+          player.number === rosterNumber ? updatedValue : player
         )
       );
     }
+
+    setOpenDropdown(null);
   };
 
   const handleCoachChange = (team, role, value) => {
@@ -268,8 +369,12 @@ function MatchSetup() {
       return;
     }
 
-    const selectedTeamA = teams.find((team) => team.id === teamAId);
-    const selectedTeamB = teams.find((team) => team.id === teamBId);
+    const selectedTeamA = teams.find(
+      (team) => Number(team.id) === Number(teamAId)
+    );
+    const selectedTeamB = teams.find(
+      (team) => Number(team.id) === Number(teamBId)
+    );
 
     const formData = {
       teamAId,
@@ -327,6 +432,93 @@ function MatchSetup() {
     fontSize: "13px",
   };
 
+  const renderPlayerDropdown = (team, player, teamPlayers) => {
+    const key = `${team}-player-${player.number}`;
+    const isOpen = openDropdown === key;
+    const options = getOptionsForRow(teamPlayers, player.number);
+    const selectedPlayer = options.find(
+      (option) => Number(option.id) === Number(player.playerId)
+    );
+
+    return (
+      <div key={player.number} className="player-row">
+        <div className="player-no">{player.number}</div>
+
+        <div style={{ position: "relative" }}>
+          <div
+            className="app-input"
+            onClick={() => setOpenDropdown(isOpen ? null : key)}
+            style={{
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              userSelect: "none",
+            }}
+          >
+            <span
+              style={{
+                color: selectedPlayer ? "#f4f7fb" : "#7f91ab",
+                fontWeight: selectedPlayer ? 600 : 500,
+              }}
+            >
+              {selectedPlayer
+                ? `${getPlayerName(selectedPlayer)}${
+                    getPlayerNumber(selectedPlayer) != null
+                      ? ` (#${getPlayerNumber(selectedPlayer)})`
+                      : ""
+                  }`
+                : "Select player"}
+            </span>
+
+            <span
+              style={{
+                color: "rgba(255,255,255,0.72)",
+                fontSize: "14px",
+                transition: "transform 0.2s ease",
+                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+            >
+              ▼
+            </span>
+          </div>
+
+          {isOpen && (
+            <div style={dropdownStyle}>
+              {options.length > 0 ? (
+                options.map((option) => (
+                  <div
+                    key={option.id}
+                    style={optionStyle}
+                    onMouseDown={() =>
+                      handlePlayerSelect(team, player.number, option.id)
+                    }
+                  >
+                    <div style={optionTitleStyle}>{getPlayerName(option)}</div>
+                    <div style={optionMetaStyle}>
+                      {getPlayerNumber(option) != null
+                        ? `#${getPlayerNumber(option)}`
+                        : "No number"}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    padding: "14px 16px",
+                    color: "rgba(255,255,255,0.68)",
+                  }}
+                >
+                  No players found.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <AppLayout>
       <form onSubmit={handleSubmit}>
@@ -372,7 +564,7 @@ function MatchSetup() {
                   Team A Roster
                 </h2>
                 <p className="section-subtitle">
-                  Enter team name, players, and coaching staff.
+                  Select the team and choose players from the database.
                 </p>
               </div>
               <div className="team-badge a">A</div>
@@ -421,20 +613,9 @@ function MatchSetup() {
               )}
             </div>
 
-            {playersA.map((player) => (
-              <div key={player.number} className="player-row">
-                <div className="player-no">{player.number}</div>
-                <input
-                  type="text"
-                  value={player.name}
-                  onChange={(e) =>
-                    handlePlayerChange("A", player.number, e.target.value)
-                  }
-                  placeholder={`Player ${player.number} name`}
-                  className="app-input"
-                />
-              </div>
-            ))}
+            {playersA.map((player) =>
+              renderPlayerDropdown("A", player, teamAPlayers)
+            )}
 
             <div style={{ marginTop: "20px" }}>
               <h3 className="live-card-title" style={{ marginBottom: "12px" }}>
@@ -509,7 +690,7 @@ function MatchSetup() {
                   Team B Roster
                 </h2>
                 <p className="section-subtitle">
-                  Enter team name, players, and coaching staff.
+                  Select the team and choose players from the database.
                 </p>
               </div>
               <div className="team-badge b">B</div>
@@ -558,20 +739,9 @@ function MatchSetup() {
               )}
             </div>
 
-            {playersB.map((player) => (
-              <div key={player.number} className="player-row">
-                <div className="player-no">{player.number}</div>
-                <input
-                  type="text"
-                  value={player.name}
-                  onChange={(e) =>
-                    handlePlayerChange("B", player.number, e.target.value)
-                  }
-                  placeholder={`Player ${player.number} name`}
-                  className="app-input"
-                />
-              </div>
-            ))}
+            {playersB.map((player) =>
+              renderPlayerDropdown("B", player, teamBPlayers)
+            )}
 
             <div style={{ marginTop: "20px" }}>
               <h3 className="live-card-title" style={{ marginBottom: "12px" }}>
