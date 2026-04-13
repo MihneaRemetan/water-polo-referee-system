@@ -45,19 +45,20 @@ public class MatchService {
         List<MatchPlayerStat> allStats = matchPlayerStatRepository.findAll();
 
         Map<String, List<MatchPlayerStat>> grouped = allStats.stream()
-                .filter(stat -> stat.getPlayerName() != null && !stat.getPlayerName().isBlank())
-                .filter(stat -> name == null || name.isBlank()
-                        || stat.getPlayerName().toLowerCase().contains(name.trim().toLowerCase()))
-                .filter(stat -> team == null || team.isBlank()
-                        || (stat.getTeam() != null
-                        && stat.getTeam().toLowerCase().contains(team.trim().toLowerCase())))
-                .filter(stat -> playerNumber == null
-                        || Objects.equals(stat.getPlayerNumber(), playerNumber))
-                .collect(Collectors.groupingBy(stat ->
-                        stat.getPlayerName().trim().toLowerCase() + "|"
-                                + (stat.getTeam() == null ? "" : stat.getTeam().trim().toLowerCase()) + "|"
-                                + (stat.getPlayerNumber() == null ? "" : stat.getPlayerNumber())
-                ));
+            .filter(stat -> stat.getPlayerNumber() != null)
+            .filter(stat -> name == null || name.isBlank()
+                    || ((stat.getPlayerName() != null)
+                    && stat.getPlayerName().toLowerCase().contains(name.trim().toLowerCase())))
+            .filter(stat -> team == null || team.isBlank()
+                    || (stat.getTeam() != null
+                    && stat.getTeam().toLowerCase().contains(team.trim().toLowerCase())))
+            .filter(stat -> playerNumber == null
+                    || Objects.equals(stat.getPlayerNumber(), playerNumber))
+            .collect(Collectors.groupingBy(stat ->
+                    (stat.getPlayerName() == null ? "" : stat.getPlayerName().trim().toLowerCase()) + "|"
+                            + (stat.getTeam() == null ? "" : stat.getTeam().trim().toLowerCase()) + "|"
+                            + stat.getPlayerNumber()
+            ));
 
         List<PlayerStatisticsDto> result = new ArrayList<>();
 
@@ -81,21 +82,19 @@ public class MatchService {
             double goalsPerMatch = matchesPlayed == 0 ? 0.0 : (double) totalGoals / matchesPlayed;
             double foulsPerMatch = matchesPlayed == 0 ? 0.0 : (double) totalFouls / matchesPlayed;
 
-            if (totalGoals > 0) {
-                result.add(new PlayerStatisticsDto(
-                        first.getPlayerName(),
-                        first.getTeam(),
-                        first.getPlayerNumber(),
-                        matchesPlayed,
-                        totalGoals,
-                        totalFouls,
-                        totalYellow,
-                        totalRed,
-                        totalExclusions,
-                        goalsPerMatch,
-                        foulsPerMatch
-                ));
-            }
+            result.add(new PlayerStatisticsDto(
+                    first.getPlayerName(),
+                    first.getTeam(),
+                    first.getPlayerNumber(),
+                    matchesPlayed,
+                    totalGoals,
+                    totalFouls,
+                    totalYellow,
+                    totalRed,
+                    totalExclusions,
+                    goalsPerMatch,
+                    foulsPerMatch
+            ));
         }
 
         result.sort(

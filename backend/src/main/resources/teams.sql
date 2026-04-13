@@ -1,4 +1,4 @@
-INSERT INTO teams (id, name, short_name, city) VALUES
+INSERT IGNORE INTO teams (id, name, short_name, city) VALUES
 (1, 'CSM Oradea', 'CSM', 'Oradea'),
 (2, 'CSA Steaua Bucuresti', 'STE', 'Bucuresti'),
 (3, 'CS Dinamo Bucuresti', 'DIN', 'Bucuresti'),

@@ -138,7 +138,10 @@ function LiveMatch() {
       players.map((player) => ({
         team: teamLabel,
         playerNumber: player.number ?? null,
-        playerName: player.name ?? "",
+        playerName:
+          player.name && player.name.trim() !== ""
+            ? player.name.trim()
+            : `Player ${player.number}`,
         goals: player.goals ?? 0,
         fouls: player.fouls ?? 0,
         yellowCards: player.yellowCards ?? 0,
@@ -170,8 +173,8 @@ function LiveMatch() {
       endedAt: toLocalDateTimeString(new Date()),
       events: mapEvents(events),
       playerStats: [
-        ...mapPlayerStats(playersA, "A"),
-        ...mapPlayerStats(playersB, "B"),
+        ...mapPlayerStats(playersA, teamA),
+        ...mapPlayerStats(playersB, teamB),
       ],
     };
   };

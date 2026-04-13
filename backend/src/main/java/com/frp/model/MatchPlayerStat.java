@@ -10,7 +10,7 @@ public class MatchPlayerStat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 10)
+    @Column(length = 100)
     private String team;
 
     @Column(name = "player_number")

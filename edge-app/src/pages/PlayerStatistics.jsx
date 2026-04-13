@@ -29,7 +29,7 @@ function PlayerStatistics() {
         params.append("playerNumber", playerNumber.toString().trim());
       }
 
-      const url = `http://localhost:8080/statistics/players${
+      const url = `http://localhost:8080/api/statistics/players${
         params.toString() ? `?${params.toString()}` : ""
       }`;
 
