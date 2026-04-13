@@ -20,6 +20,8 @@ function MatchSetup() {
   const [teams, setTeams] = useState([]);
   const [playersFromDb, setPlayersFromDb] = useState([]);
   const [coachesFromDb, setCoachesFromDb] = useState([]);
+  const [refereesFromDb, setRefereesFromDb] = useState([]);
+  const [observersFromDb, setObserversFromDb] = useState([]);
 
   const [teamAName, setTeamAName] = useState("");
   const [teamBName, setTeamBName] = useState("");
@@ -53,6 +55,7 @@ function MatchSetup() {
     timekeeper: "",
     refereeP1: "",
     refereeP2: "",
+    observerId: "",
     observer: "",
   });
 
@@ -77,6 +80,21 @@ function MatchSetup() {
       (item) => Number(item.id) === Number(coachId)
     );
     return coach?.name ?? "";
+  };
+
+  const getRefereeName = (referee) => {
+    return referee?.name ?? referee?.fullName ?? "";
+  };
+
+  const getObserverName = (observer) => {
+    return observer?.name ?? observer?.fullName ?? "";
+  };
+
+  const getObserverNameById = (observerId) => {
+    const observer = observersFromDb.find(
+      (item) => Number(item.id) === Number(observerId)
+    );
+    return observer ? getObserverName(observer) : "";
   };
 
   const isPlayerAlreadySelected = (team, rosterNumber, playerId) => {
@@ -200,6 +218,52 @@ function MatchSetup() {
   }, []);
 
   useEffect(() => {
+    const loadReferees = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/admin/referees", {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Could not load referees:", text);
+          return;
+        }
+
+        const data = await res.json();
+        setRefereesFromDb(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("FETCH REFEREES ERROR:", err);
+      }
+    };
+
+    loadReferees();
+  }, []);
+
+  useEffect(() => {
+    const loadObservers = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/admin/observers", {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Could not load observers:", text);
+          return;
+        }
+
+        const data = await res.json();
+        setObserversFromDb(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("FETCH OBSERVERS ERROR:", err);
+      }
+    };
+
+    loadObservers();
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       const clickedOutsideTeamA =
         teamARef.current && !teamARef.current.contains(event.target);
@@ -268,6 +332,10 @@ function MatchSetup() {
       (coach) => getCoachTeamId(coach) === Number(teamBId)
     );
   }, [coachesFromDb, teamBId]);
+
+  const nonObserverOfficials = useMemo(() => {
+    return refereesFromDb;
+  }, [refereesFromDb]);
 
   const getAvailablePlayersForRow = (team, currentPlayerId, teamPlayers) => {
     const roster = team === "A" ? playersA : playersB;
@@ -466,6 +534,19 @@ function MatchSetup() {
     }));
   };
 
+  const handleObserverChange = (value) => {
+    const selectedId = value ? Number(value) : null;
+    const selectedObserver = observersFromDb.find(
+      (observer) => Number(observer.id) === selectedId
+    );
+
+    setOfficials((prev) => ({
+      ...prev,
+      observerId: value,
+      observer: selectedObserver ? getObserverName(selectedObserver) : "",
+    }));
+  };
+
   const buildCoachesPayload = (coachesState) => {
     const hcId = coachesState.hc ? Number(coachesState.hc) : null;
     const assistantIds = coachesState.assistants
@@ -559,7 +640,12 @@ function MatchSetup() {
         coaches: buildCoachesPayload(coachesB),
       },
       matchDetails,
-      officials,
+      officials: {
+        ...officials,
+        observer: officials.observerId
+          ? getObserverNameById(officials.observerId)
+          : "",
+      },
     };
 
     localStorage.setItem("matchData", JSON.stringify(formData));
@@ -681,6 +767,23 @@ function MatchSetup() {
           )}
         </div>
       </div>
+    );
+  };
+
+  const renderOfficialSelect = (field, placeholder) => {
+    return (
+      <select
+        className="app-select"
+        value={officials[field]}
+        onChange={(e) => handleOfficialChange(field, e.target.value)}
+      >
+        <option value="">{placeholder}</option>
+        {nonObserverOfficials.map((official) => (
+          <option key={official.id} value={getRefereeName(official)}>
+            {getRefereeName(official)}
+          </option>
+        ))}
+      </select>
     );
   };
 
@@ -1087,82 +1190,30 @@ function MatchSetup() {
                 Game Officials
               </h2>
               <p className="section-subtitle">
-                Enter referees and table officials.
+                Select referees and table officials.
               </p>
 
               <div className="stack-actions">
-                <input
-                  type="text"
-                  value={officials.refereeC1}
-                  onChange={(e) =>
-                    handleOfficialChange("refereeC1", e.target.value)
-                  }
-                  placeholder="Referee C1"
-                  className="app-input"
-                />
-                <input
-                  type="text"
-                  value={officials.refereeC2}
-                  onChange={(e) =>
-                    handleOfficialChange("refereeC2", e.target.value)
-                  }
-                  placeholder="Referee C2"
-                  className="app-input"
-                />
-                <input
-                  type="text"
-                  value={officials.secretary1}
-                  onChange={(e) =>
-                    handleOfficialChange("secretary1", e.target.value)
-                  }
-                  placeholder="Secretary 1"
-                  className="app-input"
-                />
-                <input
-                  type="text"
-                  value={officials.secretary2}
-                  onChange={(e) =>
-                    handleOfficialChange("secretary2", e.target.value)
-                  }
-                  placeholder="Secretary 2"
-                  className="app-input"
-                />
-                <input
-                  type="text"
-                  value={officials.timekeeper}
-                  onChange={(e) =>
-                    handleOfficialChange("timekeeper", e.target.value)
-                  }
-                  placeholder="Timekeeper"
-                  className="app-input"
-                />
-                <input
-                  type="text"
-                  value={officials.refereeP1}
-                  onChange={(e) =>
-                    handleOfficialChange("refereeP1", e.target.value)
-                  }
-                  placeholder="Referee P1"
-                  className="app-input"
-                />
-                <input
-                  type="text"
-                  value={officials.refereeP2}
-                  onChange={(e) =>
-                    handleOfficialChange("refereeP2", e.target.value)
-                  }
-                  placeholder="Referee P2"
-                  className="app-input"
-                />
-                <input
-                  type="text"
-                  value={officials.observer}
-                  onChange={(e) =>
-                    handleOfficialChange("observer", e.target.value)
-                  }
-                  placeholder="Observer"
-                  className="app-input"
-                />
+                {renderOfficialSelect("refereeC1", "Referee C1")}
+                {renderOfficialSelect("refereeC2", "Referee C2")}
+                {renderOfficialSelect("secretary1", "Secretary 1")}
+                {renderOfficialSelect("secretary2", "Secretary 2")}
+                {renderOfficialSelect("timekeeper", "Timekeeper")}
+                {renderOfficialSelect("refereeP1", "Referee P1")}
+                {renderOfficialSelect("refereeP2", "Referee P2")}
+
+                <select
+                  className="app-select"
+                  value={officials.observerId}
+                  onChange={(e) => handleObserverChange(e.target.value)}
+                >
+                  <option value="">Observer</option>
+                  {observersFromDb.map((observer) => (
+                    <option key={observer.id} value={observer.id}>
+                      {getObserverName(observer)}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
