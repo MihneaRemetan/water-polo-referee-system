@@ -151,9 +151,18 @@ public class MatchService {
         match.setMatchSeconds(request.getMatchSeconds());
         match.setShotClockSeconds(request.getShotClockSeconds());
         match.setStatus(request.getStatus());
-        match.setReferee1(request.getReferee1());
-        match.setReferee2(request.getReferee2());
+        match.setRefereeC1(request.getRefereeC1());
+        match.setRefereeC2(request.getRefereeC2());
+        match.setSecretary1(request.getSecretary1());
+        match.setSecretary2(request.getSecretary2());
+        match.setTimekeeper(request.getTimekeeper());
+        match.setRefereeP1(request.getRefereeP1());
+        match.setRefereeP2(request.getRefereeP2());
         match.setObserver(request.getObserver());
+        match.setChampionship(request.getChampionship());
+        match.setMatchDate(request.getMatchDate());
+        match.setMatchNumber(request.getMatchNumber());
+        match.setLocation(request.getLocation());
 
         if (request.getStartedAt() != null && !request.getStartedAt().isBlank()) {
             match.setStartedAt(LocalDateTime.parse(request.getStartedAt()));
@@ -235,9 +244,18 @@ public class MatchService {
                         match.getStartedAt(),
                         match.getEndedAt(),
                         match.getCreatedByOfficialId(),
-                        match.getReferee1(),
-                        match.getReferee2(),
-                        match.getObserver()
+                        match.getRefereeC1(),
+                        match.getRefereeC2(),
+                        match.getSecretary1(),
+                        match.getSecretary2(),
+                        match.getTimekeeper(),
+                        match.getRefereeP1(),
+                        match.getRefereeP2(),
+                        match.getObserver(),
+                        match.getChampionship(),
+                        match.getMatchDate(),
+                        match.getMatchNumber(),
+                        match.getLocation()
                     );
                 })
                 .toList();

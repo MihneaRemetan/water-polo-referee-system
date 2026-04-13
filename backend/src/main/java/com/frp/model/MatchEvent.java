@@ -1,6 +1,7 @@
 package com.frp.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "match_events")
@@ -33,6 +34,7 @@ public class MatchEvent {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id", nullable = false)
+    @JsonBackReference
     private Match match;
 
     public MatchEvent() {

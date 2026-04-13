@@ -160,23 +160,37 @@ function LiveMatch() {
         details: event.details,
       }));
 
-    return {
-      teamAId: resolvedTeamAId,
-      teamBId: resolvedTeamBId,
-      scoreA,
-      scoreB,
-      period,
-      matchSeconds,
-      shotClockSeconds,
-      status: "FINISHED",
-      startedAt,
-      endedAt: toLocalDateTimeString(new Date()),
-      events: mapEvents(events),
-      playerStats: [
-        ...mapPlayerStats(playersA, teamA),
-        ...mapPlayerStats(playersB, teamB),
-      ],
-    };
+      return {
+        teamAId: resolvedTeamAId,
+        teamBId: resolvedTeamBId,
+      
+        scoreA,
+        scoreB,
+        period,
+        matchSeconds,
+        shotClockSeconds,
+      
+        status: "FINISHED",
+        startedAt,
+        endedAt: toLocalDateTimeString(new Date()),
+      
+        // 🔥 AICI ESTE CHEIA
+        refereeC1: matchData.officials?.refereeC1 || "",
+        refereeC2: matchData.officials?.refereeC2 || "",
+        secretary1: matchData.officials?.secretary1 || "",
+        secretary2: matchData.officials?.secretary2 || "",
+        timekeeper: matchData.officials?.timekeeper || "",
+        refereeP1: matchData.officials?.refereeP1 || "",
+        refereeP2: matchData.officials?.refereeP2 || "",
+        observer: matchData.officials?.observer || "",
+      
+        events: mapEvents(events),
+      
+        playerStats: [
+          ...mapPlayerStats(playersA, teamA),
+          ...mapPlayerStats(playersB, teamB),
+        ],
+      };
   };
 
   const handleEndMatch = async () => {

@@ -39,7 +39,7 @@ function MatchDetails() {
     fetchMatch();
   }, [id]);
 
-  const formatDate = (value) => {
+  const formatDateTime = (value) => {
     if (!value) return "-";
 
     try {
@@ -51,20 +51,17 @@ function MatchDetails() {
     }
   };
 
-  const getTeamAName = (match) =>
-    match.teamAName || match.teamA || match.homeTeam || "Team A";
+  const getTeamAName = (data) =>
+    data.teamAName || data.teamA?.name || data.teamA || "Team A";
 
-  const getTeamBName = (match) =>
-    match.teamBName || match.teamB || match.awayTeam || "Team B";
+  const getTeamBName = (data) =>
+    data.teamBName || data.teamB?.name || data.teamB || "Team B";
 
-  const getScoreA = (match) =>
-    match.scoreA ?? match.teamAScore ?? match.homeScore ?? 0;
+  const getScoreA = (data) =>
+    data.scoreA ?? data.teamAScore ?? data.homeScore ?? 0;
 
-  const getScoreB = (match) =>
-    match.scoreB ?? match.teamBScore ?? match.awayScore ?? 0;
-
-  const getDateValue = (match) =>
-    match.date || match.matchDate || match.createdAt || match.playedAt || "";
+  const getScoreB = (data) =>
+    data.scoreB ?? data.teamBScore ?? data.awayScore ?? 0;
 
   return (
     <AppLayout>
@@ -98,6 +95,19 @@ function MatchDetails() {
               </div>
             </div>
 
+            <div className="match-officials">
+              <h3>Officials</h3>
+
+              <p>Referee C1: {match.refereeC1 || "N/A"}</p>
+              <p>Referee C2: {match.refereeC2 || "N/A"}</p>
+              <p>Secretary 1: {match.secretary1 || "N/A"}</p>
+              <p>Secretary 2: {match.secretary2 || "N/A"}</p>
+              <p>Timekeeper: {match.timekeeper || "N/A"}</p>
+              <p>Referee P1: {match.refereeP1 || "N/A"}</p>
+              <p>Referee P2: {match.refereeP2 || "N/A"}</p>
+              <p>Observer: {match.observer || "N/A"}</p>
+            </div>
+
             <div className="match-info-grid">
               <div className="info-item">
                 <span className="label">Match ID</span>
@@ -105,8 +115,53 @@ function MatchDetails() {
               </div>
 
               <div className="info-item">
-                <span className="label">Date</span>
-                <span className="value">{formatDate(getDateValue(match))}</span>
+                <span className="label">Championship</span>
+                <span className="value">{match.championship || "-"}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Match Date</span>
+                <span className="value">{match.matchDate || "-"}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Match Number</span>
+                <span className="value">{match.matchNumber || "-"}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Location</span>
+                <span className="value">{match.location || "-"}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Started At</span>
+                <span className="value">{formatDateTime(match.startedAt)}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Ended At</span>
+                <span className="value">{formatDateTime(match.endedAt)}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Status</span>
+                <span className="value">{match.status || "-"}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Period</span>
+                <span className="value">{match.period ?? "-"}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Match Seconds</span>
+                <span className="value">{match.matchSeconds ?? "-"}</span>
+              </div>
+
+              <div className="info-item">
+                <span className="label">Shot Clock Seconds</span>
+                <span className="value">{match.shotClockSeconds ?? "-"}</span>
               </div>
 
               <div className="info-item">
@@ -125,10 +180,23 @@ function MatchDetails() {
                 <h3>Events</h3>
                 <ul className="match-events-list">
                   {match.events.map((event, index) => (
-                    <li key={index}>
-                      {typeof event === "string"
-                        ? event
-                        : JSON.stringify(event)}
+                    <li key={event.id ?? index} className="event-item">
+                      <strong>{event.team || "N/A"}</strong>
+                      {" | "}#{event.playerNumber ?? "-"} {event.playerName || "Unknown"}
+
+                      <span className="event-type">
+                        {" "}→ {event.eventType || "MATCH_EVENT"}
+                      </span>
+
+                      <span className="event-time">
+                        {" "} | P{event.period ?? "-"} | {event.eventTimeSeconds ?? 0}s
+                      </span>
+
+                      {event.details && (
+                        <div className="event-details">
+                          {event.details}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>

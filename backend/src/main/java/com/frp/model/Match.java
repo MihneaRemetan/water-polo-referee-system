@@ -1,7 +1,9 @@
 package com.frp.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +42,22 @@ public class Match {
 
     private Long createdByOfficialId;
 
-    // 🔥 NOI
-    private String referee1;
-    private String referee2;
+    private String refereeC1;
+    private String refereeC2;
+    private String secretary1;
+    private String secretary2;
+    private String timekeeper;
+    private String refereeP1;
+    private String refereeP2;
     private String observer;
 
+    private String championship;
+    private String matchDate;
+    private String matchNumber;
+    private String location;
+
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<MatchEvent> events = new ArrayList<>();
 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,55 +65,219 @@ public class Match {
 
     public Match() {}
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Team getTeamA() { return teamA; }
-    public void setTeamA(Team teamA) { this.teamA = teamA; }
+    public Team getTeamA() {
+        return teamA;
+    }
 
-    public Team getTeamB() { return teamB; }
-    public void setTeamB(Team teamB) { this.teamB = teamB; }
+    public void setTeamA(Team teamA) {
+        this.teamA = teamA;
+    }
+
+    public Team getTeamB() {
+        return teamB;
+    }
+
+    public void setTeamB(Team teamB) {
+        this.teamB = teamB;
+    }
 
     @Transient
-    public String getTeamAName() { return teamA != null ? teamA.getName() : null; }
+    public String getTeamAName() {
+        return teamA != null ? teamA.getName() : null;
+    }
 
     @Transient
-    public String getTeamBName() { return teamB != null ? teamB.getName() : null; }
+    public String getTeamBName() {
+        return teamB != null ? teamB.getName() : null;
+    }
 
-    public Integer getScoreA() { return scoreA; }
-    public void setScoreA(Integer scoreA) { this.scoreA = scoreA; }
+    public Integer getScoreA() {
+        return scoreA;
+    }
 
-    public Integer getScoreB() { return scoreB; }
-    public void setScoreB(Integer scoreB) { this.scoreB = scoreB; }
+    public void setScoreA(Integer scoreA) {
+        this.scoreA = scoreA;
+    }
 
-    public Integer getPeriod() { return period; }
-    public void setPeriod(Integer period) { this.period = period; }
+    public Integer getScoreB() {
+        return scoreB;
+    }
 
-    public Integer getMatchSeconds() { return matchSeconds; }
-    public void setMatchSeconds(Integer matchSeconds) { this.matchSeconds = matchSeconds; }
+    public void setScoreB(Integer scoreB) {
+        this.scoreB = scoreB;
+    }
 
-    public Integer getShotClockSeconds() { return shotClockSeconds; }
-    public void setShotClockSeconds(Integer shotClockSeconds) { this.shotClockSeconds = shotClockSeconds; }
+    public Integer getPeriod() {
+        return period;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setPeriod(Integer period) {
+        this.period = period;
+    }
 
-    public LocalDateTime getStartedAt() { return startedAt; }
-    public void setStartedAt(LocalDateTime startedAt) { this.startedAt = startedAt; }
+    public Integer getMatchSeconds() {
+        return matchSeconds;
+    }
 
-    public LocalDateTime getEndedAt() { return endedAt; }
-    public void setEndedAt(LocalDateTime endedAt) { this.endedAt = endedAt; }
+    public void setMatchSeconds(Integer matchSeconds) {
+        this.matchSeconds = matchSeconds;
+    }
 
-    public Long getCreatedByOfficialId() { return createdByOfficialId; }
-    public void setCreatedByOfficialId(Long createdByOfficialId) { this.createdByOfficialId = createdByOfficialId; }
+    public Integer getShotClockSeconds() {
+        return shotClockSeconds;
+    }
 
-    public String getReferee1() { return referee1; }
-    public void setReferee1(String referee1) { this.referee1 = referee1; }
+    public void setShotClockSeconds(Integer shotClockSeconds) {
+        this.shotClockSeconds = shotClockSeconds;
+    }
 
-    public String getReferee2() { return referee2; }
-    public void setReferee2(String referee2) { this.referee2 = referee2; }
+    public String getStatus() {
+        return status;
+    }
 
-    public String getObserver() { return observer; }
-    public void setObserver(String observer) { this.observer = observer; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public void setStartedAt(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public LocalDateTime getEndedAt() {
+        return endedAt;
+    }
+
+    public void setEndedAt(LocalDateTime endedAt) {
+        this.endedAt = endedAt;
+    }
+
+    public Long getCreatedByOfficialId() {
+        return createdByOfficialId;
+    }
+
+    public void setCreatedByOfficialId(Long createdByOfficialId) {
+        this.createdByOfficialId = createdByOfficialId;
+    }
+
+    public String getRefereeC1() {
+        return refereeC1;
+    }
+
+    public void setRefereeC1(String refereeC1) {
+        this.refereeC1 = refereeC1;
+    }
+
+    public String getRefereeC2() {
+        return refereeC2;
+    }
+
+    public void setRefereeC2(String refereeC2) {
+        this.refereeC2 = refereeC2;
+    }
+
+    public String getSecretary1() {
+        return secretary1;
+    }
+
+    public void setSecretary1(String secretary1) {
+        this.secretary1 = secretary1;
+    }
+
+    public String getSecretary2() {
+        return secretary2;
+    }
+
+    public void setSecretary2(String secretary2) {
+        this.secretary2 = secretary2;
+    }
+
+    public String getTimekeeper() {
+        return timekeeper;
+    }
+
+    public void setTimekeeper(String timekeeper) {
+        this.timekeeper = timekeeper;
+    }
+
+    public String getRefereeP1() {
+        return refereeP1;
+    }
+
+    public void setRefereeP1(String refereeP1) {
+        this.refereeP1 = refereeP1;
+    }
+
+    public String getRefereeP2() {
+        return refereeP2;
+    }
+
+    public void setRefereeP2(String refereeP2) {
+        this.refereeP2 = refereeP2;
+    }
+
+    public String getObserver() {
+        return observer;
+    }
+
+    public void setObserver(String observer) {
+        this.observer = observer;
+    }
+
+    public String getChampionship() {
+        return championship;
+    }
+
+    public void setChampionship(String championship) {
+        this.championship = championship;
+    }
+
+    public String getMatchDate() {
+        return matchDate;
+    }
+
+    public void setMatchDate(String matchDate) {
+        this.matchDate = matchDate;
+    }
+
+    public String getMatchNumber() {
+        return matchNumber;
+    }
+
+    public void setMatchNumber(String matchNumber) {
+        this.matchNumber = matchNumber;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public List<MatchEvent> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<MatchEvent> events) {
+        this.events = events;
+    }
+
+    public List<MatchPlayerStat> getPlayerStats() {
+        return playerStats;
+    }
+
+    public void setPlayerStats(List<MatchPlayerStat> playerStats) {
+        this.playerStats = playerStats;
+    }
 
     public void addEvent(MatchEvent event) {
         events.add(event);
