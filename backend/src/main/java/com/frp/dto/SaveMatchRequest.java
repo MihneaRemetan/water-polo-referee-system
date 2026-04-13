@@ -15,119 +15,64 @@ public class SaveMatchRequest {
     private Integer shotClockSeconds;
 
     private String status;
-
     private String startedAt;
     private String endedAt;
 
     private Long createdByOfficialId;
 
+    // 🔥 NOI
+    private String referee1;
+    private String referee2;
+    private String observer;
+
     private List<MatchEventRequest> events;
     private List<MatchPlayerStatRequest> playerStats;
 
-    public SaveMatchRequest() {
-    }
+    public SaveMatchRequest() {}
 
-    public Long getTeamAId() {
-        return teamAId;
-    }
+    // getters/setters
+    public Long getTeamAId() { return teamAId; }
+    public void setTeamAId(Long teamAId) { this.teamAId = teamAId; }
 
-    public void setTeamAId(Long teamAId) {
-        this.teamAId = teamAId;
-    }
+    public Long getTeamBId() { return teamBId; }
+    public void setTeamBId(Long teamBId) { this.teamBId = teamBId; }
 
-    public Long getTeamBId() {
-        return teamBId;
-    }
+    public Integer getScoreA() { return scoreA; }
+    public void setScoreA(Integer scoreA) { this.scoreA = scoreA; }
 
-    public void setTeamBId(Long teamBId) {
-        this.teamBId = teamBId;
-    }
+    public Integer getScoreB() { return scoreB; }
+    public void setScoreB(Integer scoreB) { this.scoreB = scoreB; }
 
-    public Integer getScoreA() {
-        return scoreA;
-    }
+    public Integer getPeriod() { return period; }
+    public void setPeriod(Integer period) { this.period = period; }
 
-    public void setScoreA(Integer scoreA) {
-        this.scoreA = scoreA;
-    }
+    public Integer getMatchSeconds() { return matchSeconds; }
+    public void setMatchSeconds(Integer matchSeconds) { this.matchSeconds = matchSeconds; }
 
-    public Integer getScoreB() {
-        return scoreB;
-    }
+    public Integer getShotClockSeconds() { return shotClockSeconds; }
+    public void setShotClockSeconds(Integer shotClockSeconds) { this.shotClockSeconds = shotClockSeconds; }
 
-    public void setScoreB(Integer scoreB) {
-        this.scoreB = scoreB;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public Integer getPeriod() {
-        return period;
-    }
+    public String getStartedAt() { return startedAt; }
+    public void setStartedAt(String startedAt) { this.startedAt = startedAt; }
 
-    public void setPeriod(Integer period) {
-        this.period = period;
-    }
+    public String getEndedAt() { return endedAt; }
+    public void setEndedAt(String endedAt) { this.endedAt = endedAt; }
 
-    public Integer getMatchSeconds() {
-        return matchSeconds;
-    }
+    public String getReferee1() { return referee1; }
+    public void setReferee1(String referee1) { this.referee1 = referee1; }
 
-    public void setMatchSeconds(Integer matchSeconds) {
-        this.matchSeconds = matchSeconds;
-    }
+    public String getReferee2() { return referee2; }
+    public void setReferee2(String referee2) { this.referee2 = referee2; }
 
-    public Integer getShotClockSeconds() {
-        return shotClockSeconds;
-    }
+    public String getObserver() { return observer; }
+    public void setObserver(String observer) { this.observer = observer; }
 
-    public void setShotClockSeconds(Integer shotClockSeconds) {
-        this.shotClockSeconds = shotClockSeconds;
-    }
+    public List<MatchEventRequest> getEvents() { return events; }
+    public void setEvents(List<MatchEventRequest> events) { this.events = events; }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getStartedAt() {
-        return startedAt;
-    }
-
-    public void setStartedAt(String startedAt) {
-        this.startedAt = startedAt;
-    }
-
-    public String getEndedAt() {
-        return endedAt;
-    }
-
-    public void setEndedAt(String endedAt) {
-        this.endedAt = endedAt;
-    }
-
-    public Long getCreatedByOfficialId() {
-        return createdByOfficialId;
-    }
-
-    public void setCreatedByOfficialId(Long createdByOfficialId) {
-        this.createdByOfficialId = createdByOfficialId;
-    }
-
-    public List<MatchEventRequest> getEvents() {
-        return events;
-    }
-
-    public void setEvents(List<MatchEventRequest> events) {
-        this.events = events;
-    }
-
-    public List<MatchPlayerStatRequest> getPlayerStats() {
-        return playerStats;
-    }
-
-    public void setPlayerStats(List<MatchPlayerStatRequest> playerStats) {
-        this.playerStats = playerStats;
-    }
+    public List<MatchPlayerStatRequest> getPlayerStats() { return playerStats; }
+    public void setPlayerStats(List<MatchPlayerStatRequest> playerStats) { this.playerStats = playerStats; }
 }

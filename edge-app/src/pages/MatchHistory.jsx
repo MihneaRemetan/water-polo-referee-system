@@ -98,6 +98,18 @@ function MatchHistory() {
                     <p className="match-card-text">
                       <strong>Ended:</strong> {formatDateTime(match.endedAt)}
                     </p>
+
+                    <p className="match-card-text">
+                      <strong>Referee 1:</strong> {match.referee1 || "N/A"}
+                    </p>
+
+                    <p className="match-card-text">
+                      <strong>Referee 2:</strong> {match.referee2 || "N/A"}
+                    </p>
+
+                    <p className="match-card-text">
+                      <strong>Observer:</strong> {match.observer || "N/A"}
+                    </p>
                   </div>
                 </Link>
               ))}

@@ -70,6 +70,11 @@ function Login() {
         localStorage.removeItem("rememberedOfficialId");
       }
 
+      await fetch("http://localhost:8080/api/auth/me", {
+        method: "GET",
+        credentials: "include",
+      });
+      
       navigate("/match-setup");
     } catch (err) {
       setError("Connection error: Make sure the backend is running!");

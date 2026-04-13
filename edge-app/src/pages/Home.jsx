@@ -44,72 +44,73 @@ function Home() {
   ];
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/teams")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch teams");
-        }
-        return res.json();
-      })
-      .then((data) => setTeamsCount(Array.isArray(data) ? data.length : 0))
-      .catch(() => setTeamsCount(0));
+    const fetchJson = async (url) => {
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+      });
 
-    fetch("http://localhost:8080/api/matches")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch matches");
-        }
-        return res.json();
-      })
-      .then((data) => setMatchesCount(Array.isArray(data) ? data.length : 0))
-      .catch(() => setMatchesCount(0));
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} for ${url}`);
+      }
 
-    Promise.all([
-      fetch("http://localhost:8080/api/admin/referees").then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch referees");
-        }
-        return res.json();
-      }),
-      fetch("http://localhost:8080/api/admin/observers").then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch observers");
-        }
-        return res.json();
-      }),
-    ])
-      .then(([referees, observers]) => {
-        const refereesCount = Array.isArray(referees) ? referees.length : 0;
-        const observersCount = Array.isArray(observers) ? observers.length : 0;
-        setOfficialsCount(refereesCount + observersCount);
-      })
-      .catch(() => setOfficialsCount(0));
+      return response.json();
+    };
 
-    fetch("http://localhost:8080/statistics/players")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch players");
-        }
-        return res.json();
-      })
-      .then((data) => setPlayersCount(Array.isArray(data) ? data.length : 0))
-      .catch(() => setPlayersCount(0));
+    const loadHomeData = async () => {
+      try {
+        const teamsPromise = fetchJson("http://localhost:8080/api/teams")
+          .then((data) => setTeamsCount(Array.isArray(data) ? data.length : 0))
+          .catch((err) => {
+            console.error("Failed to fetch teams:", err);
+            setTeamsCount(0);
+          });
 
-    fetch("http://localhost:8080/api/history")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch recent matches");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setRecentMatches(data.slice(0, 3));
-        } else {
-          setRecentMatches([]);
-        }
-      })
-      .catch(() => setRecentMatches([]));
+        const matchesPromise = fetchJson("http://localhost:8080/api/matches")
+          .then((data) => {
+            const safeMatches = Array.isArray(data) ? data : [];
+            setMatchesCount(safeMatches.length);
+            setRecentMatches(safeMatches.slice(0, 3));
+          })
+          .catch((err) => {
+            console.error("Failed to fetch matches:", err);
+            setMatchesCount(0);
+            setRecentMatches([]);
+          });
+
+        const officialsPromise = Promise.all([
+          fetchJson("http://localhost:8080/api/admin/referees"),
+          fetchJson("http://localhost:8080/api/admin/observers"),
+        ])
+          .then(([referees, observers]) => {
+            const refereesCount = Array.isArray(referees) ? referees.length : 0;
+            const observersCount = Array.isArray(observers) ? observers.length : 0;
+            setOfficialsCount(refereesCount + observersCount);
+          })
+          .catch((err) => {
+            console.error("Failed to fetch officials:", err);
+            setOfficialsCount(0);
+          });
+
+        const playersPromise = fetchJson("http://localhost:8080/statistics/players")
+          .then((data) => setPlayersCount(Array.isArray(data) ? data.length : 0))
+          .catch((err) => {
+            console.error("Failed to fetch players:", err);
+            setPlayersCount(0);
+          });
+
+        await Promise.all([
+          teamsPromise,
+          matchesPromise,
+          officialsPromise,
+          playersPromise,
+        ]);
+      } catch (err) {
+        console.error("Error loading home page data:", err);
+      }
+    };
+
+    loadHomeData();
   }, []);
 
   const formatMatchDate = (dateValue) => {

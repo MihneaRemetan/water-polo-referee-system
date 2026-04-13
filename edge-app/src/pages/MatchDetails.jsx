@@ -17,7 +17,10 @@ function MatchDetails() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(`http://localhost:8080/matches/${id}`);
+        const response = await fetch(`http://localhost:8080/api/matches/${id}`, {
+          method: "GET",
+          credentials: "include",
+        });
 
         if (!response.ok) {
           throw new Error("Failed to load match details.");

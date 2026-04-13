@@ -24,32 +24,26 @@ public class Match {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Team teamB;
 
-    @Column(name = "score_a")
     private Integer scoreA;
-
-    @Column(name = "score_b")
     private Integer scoreB;
 
     @Column(name = "period_number")
     private Integer period;
 
-    @Column(name = "match_seconds")
     private Integer matchSeconds;
-
-    @Column(name = "shot_clock_seconds")
     private Integer shotClockSeconds;
 
-    @Column(nullable = false)
     private String status;
 
-    @Column(name = "started_at")
     private LocalDateTime startedAt;
-
-    @Column(name = "ended_at")
     private LocalDateTime endedAt;
 
-    @Column(name = "created_by_official_id")
     private Long createdByOfficialId;
+
+    // 🔥 NOI
+    private String referee1;
+    private String referee2;
+    private String observer;
 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MatchEvent> events = new ArrayList<>();
@@ -57,144 +51,65 @@ public class Match {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MatchPlayerStat> playerStats = new ArrayList<>();
 
-    public Match() {
-    }
+    public Match() {}
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public Team getTeamA() {
-        return teamA;
-    }
+    public Team getTeamA() { return teamA; }
+    public void setTeamA(Team teamA) { this.teamA = teamA; }
 
-    public void setTeamA(Team teamA) {
-        this.teamA = teamA;
-    }
-
-    public Team getTeamB() {
-        return teamB;
-    }
-
-    public void setTeamB(Team teamB) {
-        this.teamB = teamB;
-    }
+    public Team getTeamB() { return teamB; }
+    public void setTeamB(Team teamB) { this.teamB = teamB; }
 
     @Transient
-    public String getTeamAName() {
-        return teamA != null ? teamA.getName() : null;
-    }
+    public String getTeamAName() { return teamA != null ? teamA.getName() : null; }
 
     @Transient
-    public String getTeamBName() {
-        return teamB != null ? teamB.getName() : null;
-    }
+    public String getTeamBName() { return teamB != null ? teamB.getName() : null; }
 
-    @Transient
-    public String getTeamAShortName() {
-        return teamA != null ? teamA.getShortName() : null;
-    }
+    public Integer getScoreA() { return scoreA; }
+    public void setScoreA(Integer scoreA) { this.scoreA = scoreA; }
 
-    @Transient
-    public String getTeamBShortName() {
-        return teamB != null ? teamB.getShortName() : null;
-    }
+    public Integer getScoreB() { return scoreB; }
+    public void setScoreB(Integer scoreB) { this.scoreB = scoreB; }
 
-    public Integer getScoreA() {
-        return scoreA;
-    }
+    public Integer getPeriod() { return period; }
+    public void setPeriod(Integer period) { this.period = period; }
 
-    public void setScoreA(Integer scoreA) {
-        this.scoreA = scoreA;
-    }
+    public Integer getMatchSeconds() { return matchSeconds; }
+    public void setMatchSeconds(Integer matchSeconds) { this.matchSeconds = matchSeconds; }
 
-    public Integer getScoreB() {
-        return scoreB;
-    }
+    public Integer getShotClockSeconds() { return shotClockSeconds; }
+    public void setShotClockSeconds(Integer shotClockSeconds) { this.shotClockSeconds = shotClockSeconds; }
 
-    public void setScoreB(Integer scoreB) {
-        this.scoreB = scoreB;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public Integer getPeriod() {
-        return period;
-    }
+    public LocalDateTime getStartedAt() { return startedAt; }
+    public void setStartedAt(LocalDateTime startedAt) { this.startedAt = startedAt; }
 
-    public void setPeriod(Integer period) {
-        this.period = period;
-    }
+    public LocalDateTime getEndedAt() { return endedAt; }
+    public void setEndedAt(LocalDateTime endedAt) { this.endedAt = endedAt; }
 
-    public Integer getMatchSeconds() {
-        return matchSeconds;
-    }
+    public Long getCreatedByOfficialId() { return createdByOfficialId; }
+    public void setCreatedByOfficialId(Long createdByOfficialId) { this.createdByOfficialId = createdByOfficialId; }
 
-    public void setMatchSeconds(Integer matchSeconds) {
-        this.matchSeconds = matchSeconds;
-    }
+    public String getReferee1() { return referee1; }
+    public void setReferee1(String referee1) { this.referee1 = referee1; }
 
-    public Integer getShotClockSeconds() {
-        return shotClockSeconds;
-    }
+    public String getReferee2() { return referee2; }
+    public void setReferee2(String referee2) { this.referee2 = referee2; }
 
-    public void setShotClockSeconds(Integer shotClockSeconds) {
-        this.shotClockSeconds = shotClockSeconds;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getStartedAt() {
-        return startedAt;
-    }
-
-    public void setStartedAt(LocalDateTime startedAt) {
-        this.startedAt = startedAt;
-    }
-
-    public LocalDateTime getEndedAt() {
-        return endedAt;
-    }
-
-    public void setEndedAt(LocalDateTime endedAt) {
-        this.endedAt = endedAt;
-    }
-
-    public Long getCreatedByOfficialId() {
-        return createdByOfficialId;
-    }
-
-    public void setCreatedByOfficialId(Long createdByOfficialId) {
-        this.createdByOfficialId = createdByOfficialId;
-    }
-
-    public List<MatchEvent> getEvents() {
-        return events;
-    }
-
-    public void setEvents(List<MatchEvent> events) {
-        this.events = events;
-    }
-
-    public List<MatchPlayerStat> getPlayerStats() {
-        return playerStats;
-    }
-
-    public void setPlayerStats(List<MatchPlayerStat> playerStats) {
-        this.playerStats = playerStats;
-    }
+    public String getObserver() { return observer; }
+    public void setObserver(String observer) { this.observer = observer; }
 
     public void addEvent(MatchEvent event) {
         events.add(event);
         event.setMatch(this);
     }
 
-    public void addPlayerStat(MatchPlayerStat playerStat) {
-        playerStats.add(playerStat);
-        playerStat.setMatch(this);
+    public void addPlayerStat(MatchPlayerStat stat) {
+        playerStats.add(stat);
+        stat.setMatch(this);
     }
 }

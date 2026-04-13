@@ -145,12 +145,15 @@ public class MatchService {
 
         match.setTeamA(teamA);
         match.setTeamB(teamB);
-        match.setScoreA(request.getScoreA());
-        match.setScoreB(request.getScoreB());
+        match.setScoreA(request.getScoreA() != null ? request.getScoreA() : 0);
+        match.setScoreB(request.getScoreB() != null ? request.getScoreB() : 0);
         match.setPeriod(request.getPeriod());
         match.setMatchSeconds(request.getMatchSeconds());
         match.setShotClockSeconds(request.getShotClockSeconds());
         match.setStatus(request.getStatus());
+        match.setReferee1(request.getReferee1());
+        match.setReferee2(request.getReferee2());
+        match.setObserver(request.getObserver());
 
         if (request.getStartedAt() != null && !request.getStartedAt().isBlank()) {
             match.setStartedAt(LocalDateTime.parse(request.getStartedAt()));
@@ -203,17 +206,24 @@ public class MatchService {
     public List<MatchHistoryDto> getMatchHistory() {
         return matchRepository.findAllWithTeams().stream()
                 .map(match -> {
+                    Integer scoreA = match.getScoreA();
+                    Integer scoreB = match.getScoreB();
+
+                    // fallback dacă sunt null
+                    int safeScoreA = scoreA != null ? scoreA : 0;
+                    int safeScoreB = scoreB != null ? scoreB : 0;
+
                     String winner;
-                    if (match.getScoreA() > match.getScoreB()) {
+                    if (safeScoreA > safeScoreB) {
                         winner = match.getTeamA().getName();
-                    } else if (match.getScoreB() > match.getScoreA()) {
+                    } else if (safeScoreB > safeScoreA) {
                         winner = match.getTeamB().getName();
                     } else {
                         winner = "Draw";
                     }
 
                     return new MatchHistoryDto(
-                             match.getId(),
+                        match.getId(),
                         match.getTeamA().getName(),
                         match.getTeamB().getName(),
                         match.getScoreA(),
@@ -224,7 +234,10 @@ public class MatchService {
                         match.getStatus(),
                         match.getStartedAt(),
                         match.getEndedAt(),
-                        match.getCreatedByOfficialId()
+                        match.getCreatedByOfficialId(),
+                        match.getReferee1(),
+                        match.getReferee2(),
+                        match.getObserver()
                     );
                 })
                 .toList();

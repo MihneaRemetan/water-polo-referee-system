@@ -15,10 +15,15 @@ public class MatchHistoryDto {
     private String status;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
+
     private Long createdByOfficialId;
 
-    public MatchHistoryDto() {
-    }
+    // 🔥 NOI
+    private String referee1;
+    private String referee2;
+    private String observer;
+
+    public MatchHistoryDto() {}
 
     public MatchHistoryDto(
             Long id,
@@ -32,7 +37,10 @@ public class MatchHistoryDto {
             String status,
             LocalDateTime startedAt,
             LocalDateTime endedAt,
-            Long createdByOfficialId
+            Long createdByOfficialId,
+            String referee1,
+            String referee2,
+            String observer
     ) {
         this.id = id;
         this.teamAName = teamAName;
@@ -46,101 +54,26 @@ public class MatchHistoryDto {
         this.startedAt = startedAt;
         this.endedAt = endedAt;
         this.createdByOfficialId = createdByOfficialId;
+        this.referee1 = referee1;
+        this.referee2 = referee2;
+        this.observer = observer;
     }
 
-    public Long getId() {
-        return id;
-    }
+    // getters
+    public Long getId() { return id; }
+    public String getTeamAName() { return teamAName; }
+    public String getTeamBName() { return teamBName; }
+    public Integer getScoreA() { return scoreA; }
+    public Integer getScoreB() { return scoreB; }
+    public Integer getPeriod() { return period; }
+    public Integer getMatchSeconds() { return matchSeconds; }
+    public Integer getShotClockSeconds() { return shotClockSeconds; }
+    public String getStatus() { return status; }
+    public LocalDateTime getStartedAt() { return startedAt; }
+    public LocalDateTime getEndedAt() { return endedAt; }
+    public Long getCreatedByOfficialId() { return createdByOfficialId; }
 
-    public String getTeamAName() {
-        return teamAName;
-    }
-
-    public String getTeamBName() {
-        return teamBName;
-    }
-
-    public Integer getScoreA() {
-        return scoreA;
-    }
-
-    public Integer getScoreB() {
-        return scoreB;
-    }
-
-    public Integer getPeriod() {
-        return period;
-    }
-
-    public Integer getMatchSeconds() {
-        return matchSeconds;
-    }
-
-    public Integer getShotClockSeconds() {
-        return shotClockSeconds;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getStartedAt() {
-        return startedAt;
-    }
-
-    public LocalDateTime getEndedAt() {
-        return endedAt;
-    }
-
-    public Long getCreatedByOfficialId() {
-        return createdByOfficialId;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setTeamAName(String teamAName) {
-        this.teamAName = teamAName;
-    }
-
-    public void setTeamBName(String teamBName) {
-        this.teamBName = teamBName;
-    }
-
-    public void setScoreA(Integer scoreA) {
-        this.scoreA = scoreA;
-    }
-
-    public void setScoreB(Integer scoreB) {
-        this.scoreB = scoreB;
-    }
-
-    public void setPeriod(Integer period) {
-        this.period = period;
-    }
-
-    public void setMatchSeconds(Integer matchSeconds) {
-        this.matchSeconds = matchSeconds;
-    }
-
-    public void setShotClockSeconds(Integer shotClockSeconds) {
-        this.shotClockSeconds = shotClockSeconds;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setStartedAt(LocalDateTime startedAt) {
-        this.startedAt = startedAt;
-    }
-
-    public void setEndedAt(LocalDateTime endedAt) {
-        this.endedAt = endedAt;
-    }
-
-    public void setCreatedByOfficialId(Long createdByOfficialId) {
-        this.createdByOfficialId = createdByOfficialId;
-    }
+    public String getReferee1() { return referee1; }
+    public String getReferee2() { return referee2; }
+    public String getObserver() { return observer; }
 }

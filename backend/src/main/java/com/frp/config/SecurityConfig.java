@@ -44,8 +44,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers("/api/teams/**").permitAll()
 
-                        .requestMatchers("/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
                         .requestMatchers(HttpMethod.GET, "/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
+                        .requestMatchers(HttpMethod.POST, "/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
 
                         .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
                         .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
@@ -62,7 +62,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
                 .logout(logout -> logout.disable());
 
         return http.build();
