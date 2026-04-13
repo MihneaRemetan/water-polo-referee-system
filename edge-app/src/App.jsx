@@ -10,6 +10,7 @@ import PlayerStatistics from "./pages/PlayerStatistics";
 import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PlayersPage from "./pages/PlayersPage";
+import Coaches from "./pages/Coaches";
 
 function App() {
   return (
@@ -91,6 +92,15 @@ function App() {
         element={
           <ProtectedRoute>
             <PlayersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/coaches"
+        element={
+          <ProtectedRoute>
+            <Coaches />
           </ProtectedRoute>
         }
       />

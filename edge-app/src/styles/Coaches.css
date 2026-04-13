@@ -1,0 +1,258 @@
+.coaches-page {
+    min-height: 100%;
+    color: #f5f7fb;
+  }
+  
+  .coaches-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding: 28px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(8, 19, 44, 0.96), rgba(11, 30, 63, 0.9));
+    border: 1px solid rgba(92, 130, 201, 0.18);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+  }
+  
+  .coaches-eyebrow {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8fb3ff;
+  }
+  
+  .coaches-hero h1 {
+    margin: 0 0 8px;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffffff;
+  }
+  
+  .coaches-subtitle {
+    margin: 0;
+    max-width: 700px;
+    color: #c9d6f3;
+    line-height: 1.6;
+  }
+  
+  .coaches-summary-card {
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(143, 179, 255, 0.2);
+  }
+  
+  .coaches-summary-label {
+    font-size: 0.9rem;
+    color: #b8c7ea;
+    margin-bottom: 10px;
+  }
+  
+  .coaches-summary-card strong {
+    font-size: 2rem;
+    color: #ffffff;
+  }
+  
+  .coaches-toolbar {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .coaches-search,
+  .coaches-filter,
+  .coaches-form input,
+  .coaches-form select {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(130, 154, 201, 0.22);
+    background: rgba(10, 22, 47, 0.95);
+    color: #ffffff;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .coaches-search {
+    flex: 1 1 380px;
+  }
+  
+  .coaches-filter {
+    flex: 0 0 220px;
+  }
+  
+  .coaches-search:focus,
+  .coaches-filter:focus,
+  .coaches-form input:focus,
+  .coaches-form select:focus {
+    border-color: rgba(123, 170, 255, 0.9);
+    box-shadow: 0 0 0 3px rgba(82, 129, 218, 0.18);
+  }
+  
+  .coaches-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  
+  .coaches-list-card,
+  .coaches-form-card {
+    background: linear-gradient(180deg, rgba(8, 17, 37, 0.96), rgba(10, 23, 48, 0.94));
+    border: 1px solid rgba(92, 130, 201, 0.18);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  }
+  
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  
+  .section-header h2 {
+    margin: 0 0 4px;
+    color: #ffffff;
+    font-size: 1.3rem;
+  }
+  
+  .section-header p {
+    margin: 0;
+    color: #aebfe4;
+  }
+  
+  .coaches-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  .coaches-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .coaches-table th,
+  .coaches-table td {
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(112, 138, 192, 0.16);
+  }
+  
+  .coaches-table th {
+    color: #8fb3ff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  
+  .coaches-table td {
+    color: #f5f7fb;
+  }
+  
+  .coaches-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  .coaches-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-group label {
+    color: #dfe8ff;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .coaches-add-btn {
+    margin-top: 4px;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #ffffff;
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  }
+  
+  .coaches-add-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 36px rgba(37, 99, 235, 0.34);
+  }
+  
+  .coaches-add-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .coaches-message,
+  .coaches-empty {
+    padding: 14px 16px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    background: rgba(18, 33, 63, 0.92);
+    color: #e8efff;
+    border: 1px solid rgba(112, 138, 192, 0.18);
+  }
+  
+  .coaches-message.error {
+    background: rgba(91, 22, 22, 0.9);
+    border-color: rgba(220, 38, 38, 0.32);
+    color: #ffd7d7;
+  }
+  
+  @media (max-width: 1000px) {
+    .coaches-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .coaches-hero {
+      flex-direction: column;
+    }
+  
+    .coaches-summary-card {
+      align-items: flex-start;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .coaches-hero {
+      padding: 20px;
+    }
+  
+    .coaches-list-card,
+    .coaches-form-card {
+      padding: 18px;
+    }
+  
+    .coaches-toolbar {
+      flex-direction: column;
+    }
+  
+    .coaches-filter {
+      flex: 1 1 auto;
+    }
+  }

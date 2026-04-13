@@ -20,6 +20,7 @@ function Topbar() {
     { label: "Statistics", path: "/statistics" },
     { label: "Players", path: "/players" },
     { label: "Matches", path: "/history" },
+    { label: "Coaches", path: "/coaches" },
   ];
 
   const isActive = (path) => location.pathname === path;
