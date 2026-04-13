@@ -16,9 +16,6 @@ public class Player {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private Integer number;
-
     private String position;
 
     private String gender;
@@ -40,10 +37,6 @@ public class Player {
 
     public String getName() {
         return name;
-    }
-
-    public Integer getNumber() {
-        return number;
     }
 
     public String getPosition() {
@@ -68,10 +61,6 @@ public class Player {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setNumber(Integer number) {
-        this.number = number;
     }
 
     public void setPosition(String position) {

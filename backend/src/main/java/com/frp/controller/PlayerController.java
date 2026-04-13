@@ -4,10 +4,12 @@ import com.frp.model.Player;
 import com.frp.model.Team;
 import com.frp.repository.PlayerRepository;
 import com.frp.repository.TeamRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/players")
@@ -23,100 +25,95 @@ public class PlayerController {
     }
 
     @GetMapping
-    public List<Player> getAll() {
+    public ResponseEntity<List<Player>> getAllPlayers() {
         List<Player> players = playerRepository.findAll();
-        players.sort(Comparator
-                .comparing((Player p) -> p.getTeam() != null && p.getTeam().getName() != null ? p.getTeam().getName() : "")
-                .thenComparing(p -> p.getNumber() != null ? p.getNumber() : 0));
-        return players;
+        return ResponseEntity.ok(players);
     }
 
-    @GetMapping("/team/{teamId}")
-    public List<Player> getByTeam(@PathVariable Long teamId) {
-        return playerRepository.findByTeamIdOrderByNumberAsc(teamId);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPlayerById(@PathVariable Long id) {
+        return playerRepository.findById(id)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found."));
     }
 
     @PostMapping
-    public Player create(@RequestBody Player player) {
-        validatePlayer(player);
-
-        Long teamId = player.getTeam().getId();
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new RuntimeException("Echipa nu a fost găsită."));
-
-        String playerCode = generatePlayerCode(team, player.getNumber());
-
-        if (playerRepository.existsByPlayerCode(playerCode)) {
-            throw new RuntimeException("Există deja un jucător cu codul " + playerCode);
-        }
-
-        player.setTeam(team);
-        player.setPlayerCode(playerCode);
-
-        return playerRepository.save(player);
-    }
-
-    @PutMapping("/{id}")
-    public Player update(@PathVariable Long id, @RequestBody Player updated) {
-        Player existing = playerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Jucătorul nu a fost găsit."));
-
-        validatePlayer(updated);
-
-        Long teamId = updated.getTeam().getId();
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new RuntimeException("Echipa nu a fost găsită."));
-
-        String playerCode = generatePlayerCode(team, updated.getNumber());
-
-        playerRepository.findByPlayerCode(playerCode).ifPresent(player -> {
-            if (!player.getId().equals(id)) {
-                throw new RuntimeException("Există deja un jucător cu codul " + playerCode);
-            }
-        });
-
-        existing.setName(updated.getName());
-        existing.setNumber(updated.getNumber());
-        existing.setPosition(updated.getPosition());
-        existing.setGender(updated.getGender());
-        existing.setTeam(team);
-        existing.setPlayerCode(playerCode);
-
-        return playerRepository.save(existing);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        if (!playerRepository.existsById(id)) {
-            throw new RuntimeException("Jucătorul nu a fost găsit.");
-        }
-        playerRepository.deleteById(id);
-    }
-
-    private void validatePlayer(Player player) {
-        if (player.getName() == null || player.getName().isBlank()) {
-            throw new RuntimeException("Numele este obligatoriu.");
-        }
-
-        if (player.getNumber() == null || player.getNumber() < 1 || player.getNumber() > 99) {
-            throw new RuntimeException("Numărul trebuie să fie între 1 și 99.");
+    public ResponseEntity<?> createPlayer(@RequestBody Player player) {
+        if (player.getName() == null || player.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Player name is required.");
         }
 
         if (player.getTeam() == null || player.getTeam().getId() == null) {
-            throw new RuntimeException("Echipa este obligatorie.");
+            return ResponseEntity.badRequest().body("Team is required.");
         }
+
+        Optional<Team> teamOptional = teamRepository.findById(player.getTeam().getId());
+        if (teamOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("Selected team does not exist.");
+        }
+
+        player.setTeam(teamOptional.get());
+
+        if (player.getPlayerCode() == null || player.getPlayerCode().trim().isEmpty()) {
+            String shortName = teamOptional.get().getShortName() != null
+                    ? teamOptional.get().getShortName().trim().toUpperCase()
+                    : "PLY";
+
+            long countForTeam = playerRepository.findAll().stream()
+                    .filter(p -> p.getTeam() != null && p.getTeam().getId() != null)
+                    .filter(p -> p.getTeam().getId().equals(teamOptional.get().getId()))
+                    .count();
+
+            String generatedCode = shortName + "_" + String.format("%02d", countForTeam + 1);
+            player.setPlayerCode(generatedCode);
+        }
+
+        Player saved = playerRepository.save(player);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    private String generatePlayerCode(Team team, Integer number) {
-        String shortName = team.getShortName();
-
-        if (shortName == null || shortName.isBlank()) {
-            String teamName = team.getName() == null ? "TEAM" : team.getName().trim();
-            shortName = teamName.length() >= 3
-                    ? teamName.substring(0, 3).toUpperCase()
-                    : teamName.toUpperCase();
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePlayer(@PathVariable Long id, @RequestBody Player updated) {
+        Optional<Player> existingOptional = playerRepository.findById(id);
+        if (existingOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found.");
         }
 
-        return shortName.toUpperCase() + "_" + String.format("%02d", number);
+        if (updated.getName() == null || updated.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Player name is required.");
+        }
+
+        if (updated.getTeam() == null || updated.getTeam().getId() == null) {
+            return ResponseEntity.badRequest().body("Team is required.");
+        }
+
+        Optional<Team> teamOptional = teamRepository.findById(updated.getTeam().getId());
+        if (teamOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("Selected team does not exist.");
+        }
+
+        Player existing = existingOptional.get();
+
+        existing.setName(updated.getName().trim());
+        existing.setPosition(updated.getPosition());
+        existing.setGender(updated.getGender());
+        existing.setTeam(teamOptional.get());
+
+        if (updated.getPlayerCode() != null && !updated.getPlayerCode().trim().isEmpty()) {
+            existing.setPlayerCode(updated.getPlayerCode().trim());
+        }
+
+        Player saved = playerRepository.save(existing);
+        return ResponseEntity.ok(saved);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePlayer(@PathVariable Long id) {
+        if (!playerRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found.");
+        }
+
+        playerRepository.deleteById(id);
+        return ResponseEntity.ok("Player deleted successfully.");
     }
 }

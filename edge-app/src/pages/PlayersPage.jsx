@@ -5,7 +5,6 @@ import "../styles/PlayersPage.css";
 const EMPTY_FORM = {
   id: "",
   name: "",
-  number: "",
   position: "",
   gender: "",
   teamId: "",
@@ -76,7 +75,6 @@ function PlayersPage() {
     setForm({
       id: player.id ?? "",
       name: player.name ?? "",
-      number: player.number ?? "",
       position: player.position ?? "",
       gender: player.gender ?? "",
       teamId: player.team?.id ?? "",
@@ -102,9 +100,6 @@ function PlayersPage() {
 
   function validateForm() {
     if (!form.name.trim()) return "Introdu numele jucătorului.";
-    if (form.number === "" || Number(form.number) < 1 || Number(form.number) > 99) {
-      return "Numărul jucătorului trebuie să fie între 1 și 99.";
-    }
     if (!form.position.trim()) return "Introdu poziția.";
     if (!form.gender.trim()) return "Selectează genul.";
     if (!form.teamId) return "Selectează echipa.";
@@ -135,7 +130,6 @@ function PlayersPage() {
       const payload = {
         ...(editingPlayer ? {} : { id: Number(form.id) || undefined }),
         name: form.name.trim(),
-        number: Number(form.number),
         position: form.position.trim(),
         gender: form.gender,
         team: {
@@ -209,7 +203,6 @@ function PlayersPage() {
       const teamName = p.team?.name?.toLowerCase() || "";
       const playerCode = p.playerCode?.toLowerCase() || "";
       const id = String(p.id ?? "");
-      const number = String(p.number ?? "");
 
       return (
         name.includes(term) ||
@@ -217,8 +210,7 @@ function PlayersPage() {
         gender.includes(term) ||
         teamName.includes(term) ||
         playerCode.includes(term) ||
-        id.includes(term) ||
-        number.includes(term)
+        id.includes(term)
       );
     });
   }, [players, query]);
@@ -231,7 +223,8 @@ function PlayersPage() {
             <p className="players-eyebrow">Squad management</p>
             <h1>Players</h1>
             <p className="players-subtitle">
-            Manage the player database. The admin can add and delete players, while the other officials can only edit.
+              Manage the player database. The admin can add and delete players,
+              while the other officials can only edit.
             </p>
           </div>
 
@@ -274,7 +267,6 @@ function PlayersPage() {
                     <th>ID</th>
                     <th>Player Code</th>
                     <th>Name</th>
-                    <th>No.</th>
                     <th>Position</th>
                     <th>Gender</th>
                     <th>Team</th>
@@ -292,7 +284,6 @@ function PlayersPage() {
                         </span>
                       </td>
                       <td>{player.name}</td>
-                      <td>{player.number}</td>
                       <td>{player.position}</td>
                       <td>{player.gender}</td>
                       <td>{player.team?.name || "-"}</td>
@@ -356,18 +347,6 @@ function PlayersPage() {
                       type="text"
                       name="name"
                       value={form.name}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Number</label>
-                    <input
-                      type="number"
-                      name="number"
-                      min="1"
-                      max="99"
-                      value={form.number}
                       onChange={handleChange}
                     />
                   </div>

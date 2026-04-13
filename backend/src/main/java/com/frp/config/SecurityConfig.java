@@ -57,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/players/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
                         .requestMatchers(HttpMethod.DELETE, "/api/players/**").hasRole("ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/api/coaches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.disable())

@@ -12,8 +12,14 @@ function MatchSetup() {
       name: "",
     }));
 
+  const createCoachesState = () => ({
+    hc: "",
+    assistants: [""],
+  });
+
   const [teams, setTeams] = useState([]);
   const [playersFromDb, setPlayersFromDb] = useState([]);
+  const [coachesFromDb, setCoachesFromDb] = useState([]);
 
   const [teamAName, setTeamAName] = useState("");
   const [teamBName, setTeamBName] = useState("");
@@ -29,15 +35,8 @@ function MatchSetup() {
   const [playersA, setPlayersA] = useState(createPlayers());
   const [playersB, setPlayersB] = useState(createPlayers());
 
-  const [coachesA, setCoachesA] = useState({
-    hc: "",
-    assistants: [""],
-  });
-
-  const [coachesB, setCoachesB] = useState({
-    hc: "",
-    assistants: [""],
-  });
+  const [coachesA, setCoachesA] = useState(createCoachesState());
+  const [coachesB, setCoachesB] = useState(createCoachesState());
 
   const [matchDetails, setMatchDetails] = useState({
     championship: "",
@@ -67,8 +66,68 @@ function MatchSetup() {
     return player?.name ?? player?.fullName ?? "";
   };
 
-  const getPlayerNumber = (player) => {
-    return player?.number ?? player?.playerNumber ?? null;
+  const getCoachTeamId = (coach) => {
+    if (coach?.teamId != null) return Number(coach.teamId);
+    if (coach?.team?.id != null) return Number(coach.team.id);
+    return null;
+  };
+
+  const getCoachNameById = (coachId) => {
+    const coach = coachesFromDb.find(
+      (item) => Number(item.id) === Number(coachId)
+    );
+    return coach?.name ?? "";
+  };
+
+  const isPlayerAlreadySelected = (team, rosterNumber, playerId) => {
+    const selectedId = Number(playerId);
+    if (!selectedId) return false;
+
+    const roster = team === "A" ? playersA : playersB;
+
+    return roster.some(
+      (player) =>
+        player.number !== rosterNumber && Number(player.playerId) === selectedId
+    );
+  };
+
+  const getSelectedCoachIds = (
+    team,
+    excludeType = null,
+    excludeIndex = null
+  ) => {
+    const coachState = team === "A" ? coachesA : coachesB;
+    const ids = [];
+
+    if (!(excludeType === "hc") && coachState.hc) {
+      ids.push(Number(coachState.hc));
+    }
+
+    coachState.assistants.forEach((assistantId, index) => {
+      if (excludeType === "assistant" && excludeIndex === index) {
+        return;
+      }
+
+      if (assistantId) {
+        ids.push(Number(assistantId));
+      }
+    });
+
+    return ids.filter((id) => !Number.isNaN(id) && id > 0);
+  };
+
+  const isCoachAlreadySelected = (
+    team,
+    coachId,
+    excludeType = null,
+    excludeIndex = null
+  ) => {
+    const selectedId = Number(coachId);
+    if (!selectedId) return false;
+
+    return getSelectedCoachIds(team, excludeType, excludeIndex).includes(
+      selectedId
+    );
   };
 
   useEffect(() => {
@@ -115,6 +174,29 @@ function MatchSetup() {
     };
 
     loadPlayers();
+  }, []);
+
+  useEffect(() => {
+    const loadCoaches = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/coaches", {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Could not load coaches:", text);
+          return;
+        }
+
+        const data = await res.json();
+        setCoachesFromDb(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("FETCH COACHES ERROR:", err);
+      }
+    };
+
+    loadCoaches();
   }, []);
 
   useEffect(() => {
@@ -175,44 +257,53 @@ function MatchSetup() {
     );
   }, [playersFromDb, teamBId]);
 
-  const buildPlayersFromTeam = (teamId) => {
-    const teamPlayers = playersFromDb.filter(
-      (player) => getPlayerTeamId(player) === Number(teamId)
+  const teamACoaches = useMemo(() => {
+    return coachesFromDb.filter(
+      (coach) => getCoachTeamId(coach) === Number(teamAId)
     );
+  }, [coachesFromDb, teamAId]);
 
-    return Array.from({ length: 15 }, (_, index) => {
-      const rosterNumber = index + 1;
-      const matchedPlayer = teamPlayers.find(
-        (player) => Number(getPlayerNumber(player)) === rosterNumber
-      );
+  const teamBCoaches = useMemo(() => {
+    return coachesFromDb.filter(
+      (coach) => getCoachTeamId(coach) === Number(teamBId)
+    );
+  }, [coachesFromDb, teamBId]);
 
-      return {
-        number: rosterNumber,
-        playerId: matchedPlayer?.id ?? null,
-        name: getPlayerName(matchedPlayer) || "",
-      };
+  const getAvailablePlayersForRow = (team, currentPlayerId, teamPlayers) => {
+    const roster = team === "A" ? playersA : playersB;
+
+    const selectedIdsInOtherRows = roster
+      .filter((player) => Number(player.playerId) > 0)
+      .filter((player) => Number(player.playerId) !== Number(currentPlayerId))
+      .map((player) => Number(player.playerId));
+
+    return teamPlayers.filter((player) => {
+      const playerId = Number(player.id);
+      return !selectedIdsInOtherRows.includes(playerId);
     });
   };
 
-  const getOptionsForRow = (teamPlayers, rosterNumber) => {
-    const sameNumberPlayers = teamPlayers.filter(
-      (player) => Number(getPlayerNumber(player)) === Number(rosterNumber)
-    );
-
-    return sameNumberPlayers.length > 0 ? sameNumberPlayers : teamPlayers;
+  const resetTeamRosterAndCoaches = (team) => {
+    if (team === "A") {
+      setPlayersA(createPlayers());
+      setCoachesA(createCoachesState());
+    } else {
+      setPlayersB(createPlayers());
+      setCoachesB(createCoachesState());
+    }
   };
 
   const handleSelectTeamA = (team) => {
     setTeamAId(team.id);
     setTeamAName(team.name);
-    setPlayersA(buildPlayersFromTeam(team.id));
+    resetTeamRosterAndCoaches("A");
     setOpenDropdown(null);
   };
 
   const handleSelectTeamB = (team) => {
     setTeamBId(team.id);
     setTeamBName(team.name);
-    setPlayersB(buildPlayersFromTeam(team.id));
+    resetTeamRosterAndCoaches("B");
     setOpenDropdown(null);
   };
 
@@ -225,10 +316,10 @@ function MatchSetup() {
 
     if (exactMatch) {
       setTeamAId(exactMatch.id);
-      setPlayersA(buildPlayersFromTeam(exactMatch.id));
+      resetTeamRosterAndCoaches("A");
     } else {
       setTeamAId(null);
-      setPlayersA(createPlayers());
+      resetTeamRosterAndCoaches("A");
     }
   };
 
@@ -241,16 +332,24 @@ function MatchSetup() {
 
     if (exactMatch) {
       setTeamBId(exactMatch.id);
-      setPlayersB(buildPlayersFromTeam(exactMatch.id));
+      resetTeamRosterAndCoaches("B");
     } else {
       setTeamBId(null);
-      setPlayersB(createPlayers());
+      resetTeamRosterAndCoaches("B");
     }
   };
 
   const handlePlayerSelect = (team, rosterNumber, selectedPlayerId) => {
     const selectedId = selectedPlayerId ? Number(selectedPlayerId) : null;
-    const selectedPlayer = playersFromDb.find(
+
+    if (selectedId && isPlayerAlreadySelected(team, rosterNumber, selectedId)) {
+      alert("This player is already selected in this team.");
+      return;
+    }
+
+    const sourcePlayers = team === "A" ? teamAPlayers : teamBPlayers;
+
+    const selectedPlayer = sourcePlayers.find(
       (player) => Number(player.id) === selectedId
     );
 
@@ -278,6 +377,11 @@ function MatchSetup() {
   };
 
   const handleCoachChange = (team, role, value) => {
+    if (value && isCoachAlreadySelected(team, value, "hc", null)) {
+      alert("This coach is already selected for this team.");
+      return;
+    }
+
     if (team === "A") {
       setCoachesA((prev) => ({
         ...prev,
@@ -292,6 +396,11 @@ function MatchSetup() {
   };
 
   const handleAssistantCoachChange = (team, index, value) => {
+    if (value && isCoachAlreadySelected(team, value, "assistant", index)) {
+      alert("This coach is already selected for this team.");
+      return;
+    }
+
     if (team === "A") {
       setCoachesA((prev) => ({
         ...prev,
@@ -327,12 +436,18 @@ function MatchSetup() {
     if (team === "A") {
       setCoachesA((prev) => ({
         ...prev,
-        assistants: prev.assistants.filter((_, i) => i !== index),
+        assistants:
+          prev.assistants.length > 1
+            ? prev.assistants.filter((_, i) => i !== index)
+            : [""],
       }));
     } else {
       setCoachesB((prev) => ({
         ...prev,
-        assistants: prev.assistants.filter((_, i) => i !== index),
+        assistants:
+          prev.assistants.length > 1
+            ? prev.assistants.filter((_, i) => i !== index)
+            : [""],
       }));
     }
   };
@@ -349,6 +464,20 @@ function MatchSetup() {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const buildCoachesPayload = (coachesState) => {
+    const hcId = coachesState.hc ? Number(coachesState.hc) : null;
+    const assistantIds = coachesState.assistants
+      .filter((item) => item !== "")
+      .map((item) => Number(item));
+
+    return {
+      hcId,
+      hc: hcId ? getCoachNameById(hcId) : "",
+      assistantIds,
+      assistants: assistantIds.map((id) => getCoachNameById(id)).filter(Boolean),
+    };
   };
 
   const handleSubmit = (e) => {
@@ -369,6 +498,44 @@ function MatchSetup() {
       return;
     }
 
+    const teamAPlayerIds = playersA
+      .map((player) => Number(player.playerId))
+      .filter((id) => !Number.isNaN(id) && id > 0);
+
+    const teamBPlayerIds = playersB
+      .map((player) => Number(player.playerId))
+      .filter((id) => !Number.isNaN(id) && id > 0);
+
+    if (new Set(teamAPlayerIds).size !== teamAPlayerIds.length) {
+      alert("Team A contains duplicate players.");
+      return;
+    }
+
+    if (new Set(teamBPlayerIds).size !== teamBPlayerIds.length) {
+      alert("Team B contains duplicate players.");
+      return;
+    }
+
+    const teamACoachIds = [
+      coachesA.hc ? Number(coachesA.hc) : null,
+      ...coachesA.assistants.map((id) => (id ? Number(id) : null)),
+    ].filter((id) => !Number.isNaN(id) && id && id > 0);
+
+    const teamBCoachIds = [
+      coachesB.hc ? Number(coachesB.hc) : null,
+      ...coachesB.assistants.map((id) => (id ? Number(id) : null)),
+    ].filter((id) => !Number.isNaN(id) && id && id > 0);
+
+    if (new Set(teamACoachIds).size !== teamACoachIds.length) {
+      alert("Team A contains duplicate coaches.");
+      return;
+    }
+
+    if (new Set(teamBCoachIds).size !== teamBCoachIds.length) {
+      alert("Team B contains duplicate coaches.");
+      return;
+    }
+
     const selectedTeamA = teams.find(
       (team) => Number(team.id) === Number(teamAId)
     );
@@ -383,13 +550,13 @@ function MatchSetup() {
         id: teamAId,
         name: selectedTeamA?.name || "Team A",
         players: playersA,
-        coaches: coachesA,
+        coaches: buildCoachesPayload(coachesA),
       },
       teamB: {
         id: teamBId,
         name: selectedTeamB?.name || "Team B",
         players: playersB,
-        coaches: coachesB,
+        coaches: buildCoachesPayload(coachesB),
       },
       matchDetails,
       officials,
@@ -435,8 +602,14 @@ function MatchSetup() {
   const renderPlayerDropdown = (team, player, teamPlayers) => {
     const key = `${team}-player-${player.number}`;
     const isOpen = openDropdown === key;
-    const options = getOptionsForRow(teamPlayers, player.number);
-    const selectedPlayer = options.find(
+
+    const availableOptions = getAvailablePlayersForRow(
+      team,
+      player.playerId,
+      teamPlayers
+    );
+
+    const selectedPlayer = teamPlayers.find(
       (option) => Number(option.id) === Number(player.playerId)
     );
 
@@ -462,13 +635,7 @@ function MatchSetup() {
                 fontWeight: selectedPlayer ? 600 : 500,
               }}
             >
-              {selectedPlayer
-                ? `${getPlayerName(selectedPlayer)}${
-                    getPlayerNumber(selectedPlayer) != null
-                      ? ` (#${getPlayerNumber(selectedPlayer)})`
-                      : ""
-                  }`
-                : "Select player"}
+              {selectedPlayer ? getPlayerName(selectedPlayer) : "Select player"}
             </span>
 
             <span
@@ -485,8 +652,8 @@ function MatchSetup() {
 
           {isOpen && (
             <div style={dropdownStyle}>
-              {options.length > 0 ? (
-                options.map((option) => (
+              {availableOptions.length > 0 ? (
+                availableOptions.map((option) => (
                   <div
                     key={option.id}
                     style={optionStyle}
@@ -496,9 +663,7 @@ function MatchSetup() {
                   >
                     <div style={optionTitleStyle}>{getPlayerName(option)}</div>
                     <div style={optionMetaStyle}>
-                      {getPlayerNumber(option) != null
-                        ? `#${getPlayerNumber(option)}`
-                        : "No number"}
+                      {option.playerCode || `Player #${option.number ?? "-"}`}
                     </div>
                   </div>
                 ))
@@ -509,7 +674,7 @@ function MatchSetup() {
                     color: "rgba(255,255,255,0.68)",
                   }}
                 >
-                  No players found.
+                  No players available.
                 </div>
               )}
             </div>
@@ -564,7 +729,7 @@ function MatchSetup() {
                   Team A Roster
                 </h2>
                 <p className="section-subtitle">
-                  Select the team and choose players from the database.
+                  Select the team and choose players manually from the database.
                 </p>
               </div>
               <div className="team-badge a">A</div>
@@ -624,15 +789,27 @@ function MatchSetup() {
 
               <div className="player-row">
                 <div className="player-no">HC</div>
-                <input
-                  type="text"
+                <select
+                  className="app-select"
                   value={coachesA.hc}
-                  onChange={(e) =>
-                    handleCoachChange("A", "hc", e.target.value)
-                  }
-                  placeholder="Head Coach"
-                  className="app-input"
-                />
+                  onChange={(e) => handleCoachChange("A", "hc", e.target.value)}
+                >
+                  <option value="">Select Head Coach</option>
+                  {teamACoaches
+                    .filter((coach) => {
+                      const coachId = Number(coach.id);
+                      const usedIds = getSelectedCoachIds("A", "hc", null);
+                      return (
+                        coachId === Number(coachesA.hc) ||
+                        !usedIds.includes(coachId)
+                      );
+                    })
+                    .map((coach) => (
+                      <option key={coach.id} value={coach.id}>
+                        {coach.name}
+                      </option>
+                    ))}
+                </select>
               </div>
 
               {coachesA.assistants.map((assistant, index) => (
@@ -648,15 +825,33 @@ function MatchSetup() {
                 >
                   <div className="player-no">AC{index + 1}</div>
 
-                  <input
-                    type="text"
+                  <select
+                    className="app-select"
                     value={assistant}
                     onChange={(e) =>
                       handleAssistantCoachChange("A", index, e.target.value)
                     }
-                    placeholder={`Assistant Coach ${index + 1}`}
-                    className="app-input"
-                  />
+                  >
+                    <option value="">Select Assistant Coach</option>
+                    {teamACoaches
+                      .filter((coach) => {
+                        const coachId = Number(coach.id);
+                        const usedIds = getSelectedCoachIds(
+                          "A",
+                          "assistant",
+                          index
+                        );
+                        return (
+                          coachId === Number(assistant) ||
+                          !usedIds.includes(coachId)
+                        );
+                      })
+                      .map((coach) => (
+                        <option key={coach.id} value={coach.id}>
+                          {coach.name}
+                        </option>
+                      ))}
+                  </select>
 
                   <button
                     type="button"
@@ -690,7 +885,7 @@ function MatchSetup() {
                   Team B Roster
                 </h2>
                 <p className="section-subtitle">
-                  Select the team and choose players from the database.
+                  Select the team and choose players manually from the database.
                 </p>
               </div>
               <div className="team-badge b">B</div>
@@ -750,15 +945,27 @@ function MatchSetup() {
 
               <div className="player-row">
                 <div className="player-no">HC</div>
-                <input
-                  type="text"
+                <select
+                  className="app-select"
                   value={coachesB.hc}
-                  onChange={(e) =>
-                    handleCoachChange("B", "hc", e.target.value)
-                  }
-                  placeholder="Head Coach"
-                  className="app-input"
-                />
+                  onChange={(e) => handleCoachChange("B", "hc", e.target.value)}
+                >
+                  <option value="">Select Head Coach</option>
+                  {teamBCoaches
+                    .filter((coach) => {
+                      const coachId = Number(coach.id);
+                      const usedIds = getSelectedCoachIds("B", "hc", null);
+                      return (
+                        coachId === Number(coachesB.hc) ||
+                        !usedIds.includes(coachId)
+                      );
+                    })
+                    .map((coach) => (
+                      <option key={coach.id} value={coach.id}>
+                        {coach.name}
+                      </option>
+                    ))}
+                </select>
               </div>
 
               {coachesB.assistants.map((assistant, index) => (
@@ -774,15 +981,33 @@ function MatchSetup() {
                 >
                   <div className="player-no">AC{index + 1}</div>
 
-                  <input
-                    type="text"
+                  <select
+                    className="app-select"
                     value={assistant}
                     onChange={(e) =>
                       handleAssistantCoachChange("B", index, e.target.value)
                     }
-                    placeholder={`Assistant Coach ${index + 1}`}
-                    className="app-input"
-                  />
+                  >
+                    <option value="">Select Assistant Coach</option>
+                    {teamBCoaches
+                      .filter((coach) => {
+                        const coachId = Number(coach.id);
+                        const usedIds = getSelectedCoachIds(
+                          "B",
+                          "assistant",
+                          index
+                        );
+                        return (
+                          coachId === Number(assistant) ||
+                          !usedIds.includes(coachId)
+                        );
+                      })
+                      .map((coach) => (
+                        <option key={coach.id} value={coach.id}>
+                          {coach.name}
+                        </option>
+                      ))}
+                  </select>
 
                   <button
                     type="button"
