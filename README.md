@@ -91,4 +91,4 @@ The goal of the project is to provide a centralized system where referees, obser
 ```bash
 water-polo-referee-system/
 ├── backend/      # Spring Boot backend
-└── edge-app/     # React frontend
+└── frontend/     # React frontend

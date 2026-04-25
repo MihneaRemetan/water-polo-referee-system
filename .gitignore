@@ -1,15 +1,19 @@
-#macOS
+# macOS
 .DS_Store
 
-#Node(frontend)
-edge-app/node_modules/
-edge-app/dist/
-edge-app/build/
+# Node (frontend)
+node_modules/
+frontend/node_modules/
+dist/
+build/
 
-#Java/Spring Boot
-backend/target/
+# Java / Spring Boot
+target/
 *.log
 
-#IDE
+# Environment files
+.env
+
+# IDE
 .vscode/
 .idea/
