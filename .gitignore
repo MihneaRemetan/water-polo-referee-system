@@ -6,7 +6,7 @@ edge-app/node_modules/
 edge-app/dist/
 edge-app/build/
 
-# Java/Spring Boot
+#Java/Spring Boot
 backend/target/
 *.log
 
