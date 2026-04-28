@@ -11,6 +11,23 @@ function LiveMatch() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const isLocked = localStorage.getItem("liveMatchLocked") === "true";
+
+    if (isLocked) {
+      navigate("/match-setup");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    const lockStatus = localStorage.getItem("liveMatchLocked");
+    console.log("LIVE MATCH LOCK:", lockStatus);
+
+    if (lockStatus === "true") {
+      navigate("/match-setup");
+    }
+  }, [navigate]);
+
   const storedMatchData = localStorage.getItem("matchData");
   const matchData =
     location.state || (storedMatchData ? JSON.parse(storedMatchData) : {});
@@ -224,6 +241,11 @@ function LiveMatch() {
         alert(`Could not save match.\n${text}`);
         return;
       }
+
+      console.log("MATCH SAVED. LOCKING LIVE MATCH.");
+      localStorage.setItem("liveMatchLocked", "true");
+      localStorage.removeItem("matchData");
+      navigate("/matches");
 
       alert("Match saved successfully!");
     } catch (error) {

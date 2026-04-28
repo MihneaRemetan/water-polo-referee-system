@@ -698,8 +698,9 @@ function MatchSetup() {
           : "",
       },
     };
-
+    localStorage.removeItem("liveMatchLocked");
     localStorage.setItem("matchData", JSON.stringify(formData));
+
     navigate("/live-match", { state: formData });
   };
 
