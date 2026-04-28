@@ -1,3 +1,4 @@
+//PlayerFouls afiseaza jucatorii unei echipe si are butoane care trimit comenzi către LiveMatch
 function PlayerFouls({
   teamName,
   players,
@@ -21,7 +22,7 @@ function PlayerFouls({
           <h2 className="live-card-title">{teamName} Players</h2>
           <p className="live-card-subtitle">
             Track goals, eliminations, yellow cards, red cards, and player
-            status.
+            status:
           </p>
         </div>
 

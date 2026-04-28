@@ -1,3 +1,4 @@
+//primeste lista de events si le afiseaza (daca exista)
 function EventList({ events }) {
   return (
     <div className="panel live-card">
@@ -5,7 +6,7 @@ function EventList({ events }) {
         <div>
           <h2 className="live-card-title">Event List</h2>
           <p className="live-card-subtitle">
-            Match actions are logged here in chronological order.
+            Match actions are logged here in chronological order:
           </p>
         </div>
 
@@ -13,7 +14,7 @@ function EventList({ events }) {
       </div>
 
       {events.length === 0 ? (
-        <div className="event-item">No events yet.</div>
+        <div className="event-item">No events yet!</div>
       ) : (
         <div className="event-list">
           {events.map((event, index) => (

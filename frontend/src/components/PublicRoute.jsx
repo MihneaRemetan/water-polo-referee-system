@@ -1,3 +1,4 @@
+//daca exista userId ma trmite la /home, daca nu, raman in /login
 import { Navigate } from "react-router-dom";
 
 function PublicRoute({ children }) {

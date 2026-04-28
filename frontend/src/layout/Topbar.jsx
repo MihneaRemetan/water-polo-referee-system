@@ -1,4 +1,5 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+//logo + linkuri pagini + avatar utilizator + meniu logout
+import { Link, useLocation, useNavigate } from "react-router-dom"; //asa stiu pe ce pagina sunt, sa stie ce link sa activeze
 import { useEffect, useRef, useState } from "react";
 import logo from "../assets/frp-logo.png";
 
@@ -8,10 +9,12 @@ function Topbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
+  //datele user-ului din browser
   const userName = localStorage.getItem("userName") || "User";
   const userId = localStorage.getItem("userId") || "OFFICIAL-000";
   const userRole = localStorage.getItem("userRole") || "Referee";
 
+  //link urile din meniu
   const navItems = [
     { label: "Home", path: "/home" },
     { label: "Match Setup", path: "/match-setup" },

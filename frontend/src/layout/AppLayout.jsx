@@ -1,3 +1,4 @@
+//ce apare pe fiecare pagina la fel
 import Topbar from "./Topbar";
 
 function AppLayout({ children }) {
