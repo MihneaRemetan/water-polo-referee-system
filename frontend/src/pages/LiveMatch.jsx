@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { apiFetch } from "../api";
 import ScoreBoard from "../components/ScoreBoard";
 import Timer from "../components/Timer";
 import EventList from "../components/EventList";
@@ -225,14 +226,17 @@ function LiveMatch() {
         return;
       }
 
-      const response = await fetch("http://localhost:8080/api/matches", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await apiFetch(
+        "http://localhost:8080/api/matches",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
+        navigate
+      );
 
       const text = await response.text();
       console.log("Save response:", response.status, text);
