@@ -1,6 +1,7 @@
 package com.frp.service;
 
 import com.frp.dto.MatchHistoryDto;
+import com.frp.dto.MatchDetailsDto;
 import com.frp.dto.MatchEventRequest;
 import com.frp.dto.MatchPlayerStatRequest;
 import com.frp.dto.PlayerStatisticsDto;
@@ -210,6 +211,64 @@ public class MatchService {
         }
 
         return matchRepository.save(match);
+    }
+
+    public MatchDetailsDto getMatchDetails(Long id) {
+        Match match = matchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Match not found"));
+
+        MatchDetailsDto dto = new MatchDetailsDto();
+
+        dto.setId(match.getId());
+        dto.setTeamAName(match.getTeamA().getName());
+        dto.setTeamBName(match.getTeamB().getName());
+        dto.setScoreA(match.getScoreA());
+        dto.setScoreB(match.getScoreB());
+        dto.setStatus(match.getStatus());
+        dto.setStartedAt(match.getStartedAt());
+        dto.setEndedAt(match.getEndedAt());
+
+        dto.setRefereeC1(match.getRefereeC1());
+        dto.setRefereeC2(match.getRefereeC2());
+        dto.setSecretary1(match.getSecretary1());
+        dto.setSecretary2(match.getSecretary2());
+        dto.setTimekeeper(match.getTimekeeper());
+        dto.setRefereeP1(match.getRefereeP1());
+        dto.setRefereeP2(match.getRefereeP2());
+        dto.setObserver(match.getObserver());
+
+        // EVENTS (fix corect pentru câmpurile tale)
+        dto.setEvents(match.getEvents().stream().map(event -> {
+            MatchEventRequest e = new MatchEventRequest();
+
+            e.setTeam(event.getTeam());
+            e.setPlayerNumber(event.getPlayerNumber());
+            e.setPlayerName(event.getPlayerName());
+            e.setEventType(event.getEventType());
+            e.setEventTimeSeconds(event.getEventTimeSeconds());
+            e.setPeriod(event.getPeriod());
+            e.setDetails(event.getDetails());
+
+            return e;
+        }).toList());
+
+        // PLAYER STATS (fix corect pentru modelul tău)
+        dto.setPlayerStats(match.getPlayerStats().stream().map(stat -> {
+            PlayerStatisticsDto s = new PlayerStatisticsDto();
+
+            s.setPlayerName(stat.getPlayerName());
+            s.setTeam(stat.getTeam());
+            s.setPlayerNumber(stat.getPlayerNumber());
+            s.setTotalGoals(stat.getGoals());
+            s.setTotalFouls(stat.getFouls());
+            s.setTotalYellowCards(stat.getYellowCards());
+            s.setTotalRedCards(stat.getRedCards());
+            s.setTotalExclusions(Boolean.TRUE.equals(stat.getExcluded()) ? 1 : 0);
+
+            return s;
+        }).toList());
+
+        return dto;
     }
 
     public List<MatchHistoryDto> getMatchHistory() {

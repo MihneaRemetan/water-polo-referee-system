@@ -97,6 +97,49 @@ function MatchSetup() {
     return observer ? getObserverName(observer) : "";
   };
 
+  const officialFields = [
+    "refereeC1",
+    "refereeC2",
+    "secretary1",
+    "secretary2",
+    "timekeeper",
+    "refereeP1",
+    "refereeP2",
+  ];
+
+  const getSelectedOfficialNames = (excludeField = null) => {
+    const selected = officialFields
+      .filter((field) => field !== excludeField)
+      .map((field) => officials[field])
+      .filter(Boolean);
+
+    if (excludeField !== "observer" && officials.observer) {
+      selected.push(officials.observer);
+    }
+
+    return selected;
+  };
+
+  const getAvailableReferees = (currentField) => {
+    const selectedNames = getSelectedOfficialNames(currentField);
+    const currentValue = officials[currentField];
+
+    return refereesFromDb.filter((referee) => {
+      const name = getRefereeName(referee);
+      return name === currentValue || !selectedNames.includes(name);
+    });
+  };
+
+  const getAvailableObservers = () => {
+    const selectedNames = getSelectedOfficialNames("observer");
+    const currentObserverName = officials.observer;
+
+    return observersFromDb.filter((observer) => {
+      const name = getObserverName(observer);
+      return name === currentObserverName || !selectedNames.includes(name);
+    });
+  };
+
   const isPlayerAlreadySelected = (team, rosterNumber, playerId) => {
     const selectedId = Number(playerId);
     if (!selectedId) return false;
@@ -122,9 +165,7 @@ function MatchSetup() {
     }
 
     coachState.assistants.forEach((assistantId, index) => {
-      if (excludeType === "assistant" && excludeIndex === index) {
-        return;
-      }
+      if (excludeType === "assistant" && excludeIndex === index) return;
 
       if (assistantId) {
         ids.push(Number(assistantId));
@@ -332,10 +373,6 @@ function MatchSetup() {
       (coach) => getCoachTeamId(coach) === Number(teamBId)
     );
   }, [coachesFromDb, teamBId]);
-
-  const nonObserverOfficials = useMemo(() => {
-    return refereesFromDb;
-  }, [refereesFromDb]);
 
   const getAvailablePlayersForRow = (team, currentPlayerId, teamPlayers) => {
     const roster = team === "A" ? playersA : playersB;
@@ -561,6 +598,15 @@ function MatchSetup() {
     };
   };
 
+  const hasDuplicateOfficials = () => {
+    const selectedNames = [
+      ...officialFields.map((field) => officials[field]),
+      officials.observer,
+    ].filter(Boolean);
+
+    return new Set(selectedNames).size !== selectedNames.length;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -576,6 +622,11 @@ function MatchSetup() {
 
     if (teamAId === teamBId) {
       alert("Team A and Team B must be different.");
+      return;
+    }
+
+    if (hasDuplicateOfficials()) {
+      alert("The same official cannot be selected more than once.");
       return;
     }
 
@@ -778,11 +829,16 @@ function MatchSetup() {
         onChange={(e) => handleOfficialChange(field, e.target.value)}
       >
         <option value="">{placeholder}</option>
-        {nonObserverOfficials.map((official) => (
-          <option key={official.id} value={getRefereeName(official)}>
-            {getRefereeName(official)}
-          </option>
-        ))}
+
+        {getAvailableReferees(field).map((official) => {
+          const name = getRefereeName(official);
+
+          return (
+            <option key={official.id} value={name}>
+              {name}
+            </option>
+          );
+        })}
       </select>
     );
   };
@@ -790,10 +846,7 @@ function MatchSetup() {
   return (
     <AppLayout>
       <form onSubmit={handleSubmit}>
-        <div
-          className="panel"
-          style={{ padding: "22px", marginBottom: "20px" }}
-        >
+        <div className="panel" style={{ padding: "22px", marginBottom: "20px" }}>
           <div
             style={{
               display: "flex",
@@ -863,7 +916,8 @@ function MatchSetup() {
                       >
                         <div style={optionTitleStyle}>{team.name}</div>
                         <div style={optionMetaStyle}>
-                          {team.shortName || "—"} • {team.city || "Unknown city"}
+                          {team.shortName || "—"} •{" "}
+                          {team.city || "Unknown city"}
                         </div>
                       </div>
                     ))
@@ -1019,7 +1073,8 @@ function MatchSetup() {
                       >
                         <div style={optionTitleStyle}>{team.name}</div>
                         <div style={optionMetaStyle}>
-                          {team.shortName || "—"} • {team.city || "Unknown city"}
+                          {team.shortName || "—"} •{" "}
+                          {team.city || "Unknown city"}
                         </div>
                       </div>
                     ))
@@ -1208,7 +1263,7 @@ function MatchSetup() {
                   onChange={(e) => handleObserverChange(e.target.value)}
                 >
                   <option value="">Observer</option>
-                  {observersFromDb.map((observer) => (
+                  {getAvailableObservers().map((observer) => (
                     <option key={observer.id} value={observer.id}>
                       {getObserverName(observer)}
                     </option>
