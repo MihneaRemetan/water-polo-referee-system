@@ -101,11 +101,11 @@ function MatchHistory() {
                     </p>
 
                     <p className="match-card-text">
-                      <strong>Referee 1:</strong> {match.referee1 || "N/A"}
+                      <strong>Referee C1:</strong> {match.refereeC1 || "N/A"}
                     </p>
 
                     <p className="match-card-text">
-                      <strong>Referee 2:</strong> {match.referee2 || "N/A"}
+                      <strong>Referee C2:</strong> {match.refereeC2 || "N/A"}
                     </p>
 
                     <p className="match-card-text">
