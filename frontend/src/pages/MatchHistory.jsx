@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getOfflineMatches } from "../services/offlineMatchStore";
 import { Link } from "react-router-dom";
 import AppLayout from "../layout/AppLayout";
 import "../styles/MatchHistory.css";

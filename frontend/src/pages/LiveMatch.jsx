@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../api";
+import { saveMatchOffline } from "../services/offlineMatchStore";
 import ScoreBoard from "../components/ScoreBoard";
 import Timer from "../components/Timer";
 import EventList from "../components/EventList";
@@ -11,14 +12,6 @@ import AppLayout from "../layout/AppLayout";
 function LiveMatch() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const isLocked = localStorage.getItem("liveMatchLocked") === "true";
-
-    if (isLocked) {
-      navigate("/match-setup");
-    }
-  }, [navigate]);
 
   useEffect(() => {
     const lockStatus = localStorage.getItem("liveMatchLocked");
@@ -192,7 +185,6 @@ function LiveMatch() {
         startedAt,
         endedAt: toLocalDateTimeString(new Date()),
       
-        // 🔥 AICI ESTE CHEIA
         refereeC1: matchData.officials?.refereeC1 || "",
         refereeC2: matchData.officials?.refereeC2 || "",
         secretary1: matchData.officials?.secretary1 || "",
@@ -212,20 +204,20 @@ function LiveMatch() {
   };
 
   const handleEndMatch = async () => {
+    const payload = buildMatchPayload();
+    console.log("Saving match payload:", payload);
+
+    if (!resolvedTeamAId) {
+      alert("Could not save match.\nTeam A ID is missing.");
+      return;
+    }
+
+    if (!resolvedTeamBId) {
+      alert("Could not save match.\nTeam B ID is missing.");
+      return;
+    }
+
     try {
-      const payload = buildMatchPayload();
-      console.log("Saving match payload:", payload);
-
-      if (!resolvedTeamAId) {
-        alert("Could not save match.\nTeam A ID is missing.");
-        return;
-      }
-
-      if (!resolvedTeamBId) {
-        alert("Could not save match.\nTeam B ID is missing.");
-        return;
-      }
-
       const response = await apiFetch(
         "http://localhost:8080/api/matches",
         {
@@ -242,19 +234,32 @@ function LiveMatch() {
       console.log("Save response:", response.status, text);
 
       if (!response.ok) {
-        alert(`Could not save match.\n${text}`);
-        return;
+        throw new Error(text);
       }
 
-      console.log("MATCH SAVED. LOCKING LIVE MATCH.");
       localStorage.setItem("liveMatchLocked", "true");
       localStorage.removeItem("matchData");
-      navigate("/matches");
 
       alert("Match saved successfully!");
+      navigate("/matches");
+      return;
+
+      console.log("MATCH SAVED ONLINE. LOCKING LIVE MATCH.");
+      localStorage.setItem("liveMatchLocked", "true");
+      localStorage.removeItem("matchData");
+
+      navigate("/matches");
+      alert("Match saved successfully!");
     } catch (error) {
-      console.error("Error saving match:", error);
-      alert("Could not save match.\nCheck browser console.");
+      console.error("Error saving online. Saving locally instead:", error);
+
+      saveMatchOffline(payload);
+
+      localStorage.setItem("liveMatchLocked", "true");
+      localStorage.removeItem("matchData");
+
+      navigate("/matches");
+      alert("No connection. Match saved locally and will sync later.");
     }
   };
 

@@ -32,6 +32,24 @@ function Login() {
       return;
     }
 
+    // OFFLINE LOGIN
+    if (!navigator.onLine) {
+      const userId = localStorage.getItem("userId");
+      const userName = localStorage.getItem("userName");
+      const userRole = localStorage.getItem("userRole");
+      const offlineAllowed = localStorage.getItem("offlineLoginAllowed");
+
+      if (offlineAllowed === "true" && userId && userName && userRole) {
+        setInfoMessage("Offline mode: using cached session.");
+        navigate("/match-setup");
+        return;
+      }
+
+      setError("Login failed. No internet and no cached session.");
+      return;
+    }
+
+    // ONLINE LOGIN
     try {
       const response = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
@@ -60,9 +78,10 @@ function Login() {
         return;
       }
 
+      localStorage.setItem("userName", data.userName);
+      localStorage.setItem("userRole", data.userRole);
       localStorage.setItem("userId", data.userId);
-      localStorage.setItem("userName", data.name || "User");
-      localStorage.setItem("userRole", data.role);
+      localStorage.setItem("offlineLoginAllowed", "true");
 
       if (rememberMe) {
         localStorage.setItem("rememberedOfficialId", cleanId);
@@ -74,11 +93,23 @@ function Login() {
         method: "GET",
         credentials: "include",
       });
-      
+
       navigate("/match-setup");
-    } catch (err) {
-      setError("Connection error: Make sure the backend is running!");
-      console.error(err);
+    } catch (error) {
+      console.error("Login failed:", error);
+
+      const userId = localStorage.getItem("userId");
+      const userName = localStorage.getItem("userName");
+      const userRole = localStorage.getItem("userRole");
+      const offlineAllowed = localStorage.getItem("offlineLoginAllowed");
+
+      if (offlineAllowed === "true" && userId && userName && userRole) {
+        setInfoMessage("Offline mode: using cached session.");
+        navigate("/match-setup");
+        return;
+      }
+
+      setError("Login failed. No internet and no cached session.");
     }
   };
 

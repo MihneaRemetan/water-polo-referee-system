@@ -1,14 +1,37 @@
-//protejeaza paginile, nu ma lasa sa intru doar daca sunt logat
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
-  const userId = localStorage.getItem("userId"); //cauta in browser sa vada daca exista userId
+  const location = useLocation();
 
-  if (!userId) {
+  const userName = localStorage.getItem("userName");
+  const userId = localStorage.getItem("userId");
+
+  const isOffline = !navigator.onLine;
+  const path = location.pathname;
+
+  const liveMatchLocked = localStorage.getItem("liveMatchLocked");
+
+  if (path.includes("/live-match") && liveMatchLocked === "true") {
+    return <Navigate to="/match-setup" replace />;
+  }
+
+  console.log("ProtectedRoute:", {
+    userName,
+    userId,
+    isOffline,
+    path,
+  });
+
+  const offlineRestricted = ["/admin", "/history", "/statistics"];
+
+  if (isOffline && offlineRestricted.includes(path)) {
+    return <Navigate to="/match-setup" replace />;
+  }
+
+  if (!userName || !userId) {
     return <Navigate to="/" replace />;
   }
 
-  return children; //pagina normala
+  return children;
 }
-
 export default ProtectedRoute;
