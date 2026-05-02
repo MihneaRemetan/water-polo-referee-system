@@ -1,0 +1,150 @@
+/* PLAYERS */
+
+.players-table {
+  display: grid;
+  gap: 10px;
+}
+
+.player-card {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.player-card-out {
+  opacity: 0.72;
+  border-color: rgba(229, 72, 77, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(229, 72, 77, 0.08) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+}
+
+.player-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.player-number {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.player-name {
+  font-size: 12px;
+  color: var(--muted);
+  word-break: break-word;
+}
+
+.foul-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.foul-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.foul-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.foul-dot.active {
+  background: var(--danger);
+}
+
+.out-badge {
+  margin-left: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(229, 72, 77, 0.18);
+  border: 1px solid rgba(229, 72, 77, 0.32);
+  color: #ff9a9d;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.player-actions-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.player-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mini-btn {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  min-width: 48px;
+  height: 40px;
+  font-weight: 800;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%);
+  transition: 0.2s ease;
+}
+
+.mini-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.mini-btn.add,
+.mini-btn.goal-add {
+  background: linear-gradient(180deg, #5da9e8 0%, #3d7fbc 100%);
+  color: white;
+}
+
+.mini-btn.remove,
+.mini-btn.goal-remove,
+.mini-btn.yellow-remove,
+.mini-btn.red-remove {
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);
+  color: var(--text);
+}
+
+.mini-btn.yellow-add {
+  background: linear-gradient(180deg, #f5e7a1 0%, #e2c85c 100%);
+  color: #2a2508;
+}
+
+.mini-btn.red-add {
+  background: linear-gradient(180deg, #f0b4b6 0%, #d97b7f 100%);
+  color: #2a0f10;
+}
+
+@media (max-width: 900px) {
+  .player-card {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .player-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .mini-btn {
+    flex: 1;
+  }
+}

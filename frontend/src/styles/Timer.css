@@ -1,0 +1,18 @@
+/* TIMER */
+
+.timer-shell {
+  padding: 20px;
+}
+
+.timer-readout-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .timer-readout-row {
+    grid-template-columns: 1fr;
+  }
+}

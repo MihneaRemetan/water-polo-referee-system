@@ -1,0 +1,61 @@
+:root {
+  --bg: #0a101b;
+  --bg-secondary: #101a2b;
+  --panel: #121f33;
+  --panel-2: #17253b;
+  --panel-3: #1d2f4b;
+  --line: rgba(255, 255, 255, 0.08);
+  --text: #f4f7fb;
+  --muted: #9fb0c8;
+  --blue: #48a8e8;
+  --blue-dark: #2e8fce;
+  --red: #b12c2c;
+  --green: #50d36a;
+  --yellow: #f0df47;
+  --danger: #e5484d;
+  --shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(72, 168, 232, 0.18), transparent 25%),
+    radial-gradient(circle at top right, rgba(80, 211, 106, 0.12), transparent 22%),
+    linear-gradient(180deg, #08111c 0%, #0a101b 100%);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}

@@ -1,0 +1,18 @@
+/* SHOT CLOCK */
+
+.shotclock-shell {
+  padding: 20px;
+}
+
+.shotclock-readout-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .shotclock-readout-row {
+    grid-template-columns: 1fr;
+  }
+}
