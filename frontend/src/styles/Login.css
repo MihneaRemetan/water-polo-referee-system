@@ -201,45 +201,128 @@
     text-decoration: underline;
   }
   
-  .login-demo-box {
-    margin-top: 24px;
-    padding: 16px 18px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  
-  .login-demo-title {
-    font-size: 14px;
-    font-weight: 800;
-    color: #dce5f1;
-    margin-bottom: 10px;
-  }
-  
-  .login-demo-item {
-    color: #9fb0c8;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  
   .login-copy {
     margin-top: 22px;
     text-align: center;
     font-size: 12px;
     color: #7f91ab;
   }
-  
-  @media (max-width: 700px) {
-    .login-card {
-      padding: 24px;
-    }
-  
-    .login-brand {
-      flex-direction: column;
-      text-align: center;
-    }
-  
-    .login-title {
-      font-size: 28px;
-    }
+
+  .admin-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(3, 8, 18, 0.76);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
   }
+
+  .admin-contact-modal {
+    position: relative;
+    width: min(520px, 100%);
+    padding: 32px;
+    border-radius: 28px;
+    background: linear-gradient(
+      180deg,
+      rgba(20, 31, 49, 0.98) 0%,
+      rgba(12, 21, 35, 0.98) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.48);
+    color: #f4f7fb;
+  }
+
+  .admin-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    border: none;
+    background: transparent;
+    color: #9fb0c8;
+    font-size: 34px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .admin-modal-close:hover {
+    color: #ffffff;
+  }
+
+  .admin-modal-eyebrow {
+    margin: 0 0 8px;
+    color: #7ebee7;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .admin-contact-modal h2 {
+    margin: 0 0 14px;
+    color: #ffffff;
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .admin-modal-description {
+    margin: 0;
+    color: #b9c7dc;
+    line-height: 1.6;
+  }
+
+  .admin-contact-box {
+    margin: 22px 0;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .admin-contact-box p {
+    margin: 0 0 12px;
+    color: #dce5f1;
+    line-height: 1.5;
+  }
+
+  .admin-contact-box p:last-child {
+    margin-bottom: 0;
+  }
+
+  .admin-email-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #55b8ed 0%, #2d89cb 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 18px 30px rgba(72, 168, 232, 0.22);
+    transition: 0.2s ease;
+  }
+
+  .admin-email-button:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(180deg, #76c9f4 0%, #3b99db 100%);
+  }
+    
+    @media (max-width: 700px) {
+      .login-card {
+        padding: 24px;
+      }
+    
+      .login-brand {
+        flex-direction: column;
+        text-align: center;
+      }
+    
+      .login-title {
+        font-size: 28px;
+      }
+    }

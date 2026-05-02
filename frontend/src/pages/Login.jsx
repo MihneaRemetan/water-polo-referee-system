@@ -11,13 +11,57 @@ function Login() {
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [infoMessage, setInfoMessage] = useState("");
+  const [showAdminContact, setShowAdminContact] = useState(false);
 
   useEffect(() => {
     const rememberedId = localStorage.getItem("rememberedOfficialId") || "";
+
     if (rememberedId) {
       setOfficialId(rememberedId);
     }
   }, []);
+
+  const saveLoggedUser = (loginData, meData, cleanId) => {
+    const loggedUserName =
+      meData?.userName ||
+      meData?.name ||
+      meData?.fullName ||
+      meData?.officialName ||
+      loginData?.userName ||
+      loginData?.name ||
+      loginData?.fullName ||
+      loginData?.officialName ||
+      "Unknown user";
+
+    const loggedUserRole =
+      meData?.userRole ||
+      meData?.role ||
+      meData?.officialRole ||
+      loginData?.userRole ||
+      loginData?.role ||
+      loginData?.officialRole ||
+      "REFEREE";
+
+    const loggedUserId =
+      meData?.userId ||
+      meData?.id ||
+      meData?.officialId ||
+      loginData?.userId ||
+      loginData?.id ||
+      loginData?.officialId ||
+      cleanId;
+
+    localStorage.setItem("userName", String(loggedUserName));
+    localStorage.setItem("userRole", String(loggedUserRole));
+    localStorage.setItem("userId", String(loggedUserId));
+    localStorage.setItem("offlineLoginAllowed", "true");
+
+    console.log("SAVED USER:", {
+      userName: localStorage.getItem("userName"),
+      userRole: localStorage.getItem("userRole"),
+      userId: localStorage.getItem("userId"),
+    });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -64,35 +108,48 @@ function Login() {
       });
 
       const contentType = response.headers.get("content-type") || "";
-      let data;
+      let loginData = {};
 
       if (contentType.includes("application/json")) {
-        data = await response.json();
+        loginData = await response.json();
       } else {
         const text = await response.text();
-        data = { message: text };
+        loginData = { message: text };
       }
 
+      console.log("LOGIN RESPONSE:", loginData);
+
       if (!response.ok) {
-        setError(data.message || "Invalid official ID or password.");
+        setError(loginData.message || "Invalid official ID or password.");
         return;
       }
 
-      localStorage.setItem("userName", data.userName);
-      localStorage.setItem("userRole", data.userRole);
-      localStorage.setItem("userId", data.userId);
-      localStorage.setItem("offlineLoginAllowed", "true");
+      let meData = {};
+
+      try {
+        const meResponse = await fetch("http://localhost:8080/api/auth/me", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        const meContentType = meResponse.headers.get("content-type") || "";
+
+        if (meResponse.ok && meContentType.includes("application/json")) {
+          meData = await meResponse.json();
+        }
+      } catch (meError) {
+        console.warn("Could not fetch current user data:", meError);
+      }
+
+      console.log("ME RESPONSE:", meData);
+
+      saveLoggedUser(loginData, meData, cleanId);
 
       if (rememberMe) {
         localStorage.setItem("rememberedOfficialId", cleanId);
       } else {
         localStorage.removeItem("rememberedOfficialId");
       }
-
-      await fetch("http://localhost:8080/api/auth/me", {
-        method: "GET",
-        credentials: "include",
-      });
 
       navigate("/match-setup");
     } catch (error) {
@@ -113,16 +170,14 @@ function Login() {
     }
   };
 
-  const handleForgotPassword = () => {
+  const openAdminContact = () => {
     setError("");
-    setInfoMessage("Please contact the administrator to reset your password.");
+    setInfoMessage("");
+    setShowAdminContact(true);
   };
 
-  const handleContactAdmin = () => {
-    setError("");
-    setInfoMessage(
-      "For account support, please contact the federation administrator."
-    );
+  const closeAdminContact = () => {
+    setShowAdminContact(false);
   };
 
   return (
@@ -133,9 +188,12 @@ function Login() {
       <form className="login-card" onSubmit={handleLogin}>
         <div className="login-brand">
           <img src={logo} alt="FRP" className="login-logo" />
+
           <div>
             <p className="login-eyebrow">Romanian Water Polo Federation</p>
+
             <h1 className="login-title">Referee Control Platform</h1>
+
             <p className="login-subtitle">
               Sign in using the official ID and password provided by the
               administrator.
@@ -147,8 +205,12 @@ function Login() {
         {infoMessage && <div className="login-info">{infoMessage}</div>}
 
         <div className="form-group">
-          <label className="form-label">Official ID</label>
+          <label className="form-label" htmlFor="officialId">
+            Official ID
+          </label>
+
           <input
+            id="officialId"
             className="form-input"
             type="text"
             value={officialId}
@@ -159,8 +221,12 @@ function Login() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Password</label>
+          <label className="form-label" htmlFor="password">
+            Password
+          </label>
+
           <input
+            id="password"
             className="form-input"
             type="password"
             value={password}
@@ -177,13 +243,14 @@ function Login() {
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
             />
+
             <span>Remember ID</span>
           </label>
 
           <button
             type="button"
             className="login-text-button"
-            onClick={handleForgotPassword}
+            onClick={openAdminContact}
           >
             Forgot password?
           </button>
@@ -197,23 +264,65 @@ function Login() {
           <button
             type="button"
             className="login-text-button"
-            onClick={handleContactAdmin}
+            onClick={openAdminContact}
           >
             Contact administrator
           </button>
-        </div>
-
-        <div className="login-demo-box">
-          <div className="login-demo-title">Demo account</div>
-          <div className="login-demo-item">
-            ID: 100 / Password: Frp_2026_Secure_9X!
-          </div>
         </div>
 
         <p className="login-copy">
           © 2026 Romanian Water Polo Federation. All rights reserved.
         </p>
       </form>
+
+      {showAdminContact && (
+        <div className="admin-modal-overlay" onClick={closeAdminContact}>
+          <div
+            className="admin-contact-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="admin-modal-close"
+              onClick={closeAdminContact}
+              aria-label="Close contact administrator dialog"
+            >
+              ×
+            </button>
+
+            <p className="admin-modal-eyebrow">Account support</p>
+
+            <h2>Contact administrator</h2>
+
+            <p className="admin-modal-description">
+              If you forgot your password, your account is locked, or your role
+              is incorrect, please contact the competition administrator.
+            </p>
+
+            <div className="admin-contact-box">
+              <p>
+                <strong>Email:</strong> admin@frp.ro
+              </p>
+
+              <p>
+                <strong>Working hours:</strong> Monday–Friday, 09:00–17:00
+              </p>
+
+              <p>
+                <strong>Support type:</strong> account access, password reset,
+                role correction
+              </p>
+            </div>
+
+            <a
+              className="admin-email-button"
+              href="mailto:admin@frp.ro?subject=Water%20Polo%20Referee%20System%20-%20Login%20Support"
+            >
+              Send email
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

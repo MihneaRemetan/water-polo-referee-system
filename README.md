@@ -86,6 +86,22 @@ The goal of the project is to provide a centralized system where referees, obser
 
 ---
 
+## Screenshots
+
+The following screenshots present the main pages and workflows of the application.
+
+### Login Page
+![Login Page](docs/screenshots/login.png)
+
+### Home Page
+![Home Page](docs/screenshots/home.png)
+
+### Match Setup
+![Match Setup](docs/screenshots/match-setup.png)
+
+### Live Match
+![Live Match](docs/screenshots/live-match.png)
+
 ## Project Structure
 
 ```bash
