@@ -23,6 +23,9 @@ function MatchSetup() {
   const [refereesFromDb, setRefereesFromDb] = useState([]);
   const [observersFromDb, setObserversFromDb] = useState([]);
 
+  const [setupDataError, setSetupDataError] = useState("");
+  const [setupDataInfo, setSetupDataInfo] = useState("");
+
   const [teamAName, setTeamAName] = useState("");
   const [teamBName, setTeamBName] = useState("");
 
@@ -190,118 +193,151 @@ function MatchSetup() {
   };
 
   useEffect(() => {
-    const loadTeams = async () => {
+    const SETUP_CACHE_KEYS = {
+      teams: "offlineTeams",
+      players: "offlinePlayers",
+      coaches: "offlineCoaches",
+      referees: "offlineReferees",
+      observers: "offlineObservers",
+    };
+
+    const readCachedArray = (key) => {
       try {
-        const res = await fetch("http://localhost:8080/api/teams", {
-          credentials: "include",
-        });
+        const rawValue = localStorage.getItem(key);
+        if (!rawValue) return [];
 
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Could not load teams:", text);
-          return;
-        }
-
-        const data = await res.json();
-        setTeams(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("FETCH TEAMS ERROR:", err);
+        const parsedValue = JSON.parse(rawValue);
+        return Array.isArray(parsedValue) ? parsedValue : [];
+      } catch (error) {
+        console.error(`Could not read ${key} from localStorage:`, error);
+        return [];
       }
     };
 
-    loadTeams();
-  }, []);
+    const saveSetupDataToCache = ({
+      teamsData,
+      playersData,
+      coachesData,
+      refereesData,
+      observersData,
+    }) => {
+      localStorage.setItem(SETUP_CACHE_KEYS.teams, JSON.stringify(teamsData));
+      localStorage.setItem(SETUP_CACHE_KEYS.players, JSON.stringify(playersData));
+      localStorage.setItem(SETUP_CACHE_KEYS.coaches, JSON.stringify(coachesData));
+      localStorage.setItem(
+        SETUP_CACHE_KEYS.referees,
+        JSON.stringify(refereesData)
+      );
+      localStorage.setItem(
+        SETUP_CACHE_KEYS.observers,
+        JSON.stringify(observersData)
+      );
+    };
 
-  useEffect(() => {
-    const loadPlayers = async () => {
+    const loadSetupDataFromCache = () => {
+      const cachedTeams = readCachedArray(SETUP_CACHE_KEYS.teams);
+      const cachedPlayers = readCachedArray(SETUP_CACHE_KEYS.players);
+      const cachedCoaches = readCachedArray(SETUP_CACHE_KEYS.coaches);
+      const cachedReferees = readCachedArray(SETUP_CACHE_KEYS.referees);
+      const cachedObservers = readCachedArray(SETUP_CACHE_KEYS.observers);
+
+      if (
+        cachedTeams.length === 0 ||
+        cachedPlayers.length === 0 ||
+        cachedCoaches.length === 0 ||
+        cachedReferees.length === 0 ||
+        cachedObservers.length === 0
+      ) {
+        setSetupDataInfo("");
+        setSetupDataError(
+          "Offline setup data is not available. Please connect to the backend once and open Match Setup while online."
+        );
+        return false;
+      }
+
+      setTeams(cachedTeams);
+      setPlayersFromDb(cachedPlayers);
+      setCoachesFromDb(cachedCoaches);
+      setRefereesFromDb(cachedReferees);
+      setObserversFromDb(cachedObservers);
+
+      setSetupDataError("");
+      setSetupDataInfo("Offline mode: setup data loaded from local cache.");
+
+      return true;
+    };
+
+    const loadSetupData = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/players", {
-          credentials: "include",
-        });
+        const [
+          teamsResponse,
+          playersResponse,
+          coachesResponse,
+          refereesResponse,
+          observersResponse,
+        ] = await Promise.all([
+          fetch("http://localhost:8080/api/teams", {
+            credentials: "include",
+          }),
+          fetch("http://localhost:8080/api/players", {
+            credentials: "include",
+          }),
+          fetch("http://localhost:8080/api/coaches", {
+            credentials: "include",
+          }),
+          fetch("http://localhost:8080/api/admin/referees", {
+            credentials: "include",
+          }),
+          fetch("http://localhost:8080/api/admin/observers", {
+            credentials: "include",
+          }),
+        ]);
 
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Could not load players:", text);
-          return;
+        if (
+          !teamsResponse.ok ||
+          !playersResponse.ok ||
+          !coachesResponse.ok ||
+          !refereesResponse.ok ||
+          !observersResponse.ok
+        ) {
+          throw new Error("Could not load setup data from backend.");
         }
 
-        const data = await res.json();
-        setPlayersFromDb(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("FETCH PLAYERS ERROR:", err);
+        const teamsData = await teamsResponse.json();
+        const playersData = await playersResponse.json();
+        const coachesData = await coachesResponse.json();
+        const refereesData = await refereesResponse.json();
+        const observersData = await observersResponse.json();
+
+        const safeTeams = Array.isArray(teamsData) ? teamsData : [];
+        const safePlayers = Array.isArray(playersData) ? playersData : [];
+        const safeCoaches = Array.isArray(coachesData) ? coachesData : [];
+        const safeReferees = Array.isArray(refereesData) ? refereesData : [];
+        const safeObservers = Array.isArray(observersData) ? observersData : [];
+
+        setTeams(safeTeams);
+        setPlayersFromDb(safePlayers);
+        setCoachesFromDb(safeCoaches);
+        setRefereesFromDb(safeReferees);
+        setObserversFromDb(safeObservers);
+
+        saveSetupDataToCache({
+          teamsData: safeTeams,
+          playersData: safePlayers,
+          coachesData: safeCoaches,
+          refereesData: safeReferees,
+          observersData: safeObservers,
+        });
+
+        setSetupDataError("");
+        setSetupDataInfo("Setup data loaded from database and saved for offline use.");
+      } catch (error) {
+        console.error("FETCH SETUP DATA ERROR:", error);
+        loadSetupDataFromCache();
       }
     };
 
-    loadPlayers();
-  }, []);
-
-  useEffect(() => {
-    const loadCoaches = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/coaches", {
-          credentials: "include",
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Could not load coaches:", text);
-          return;
-        }
-
-        const data = await res.json();
-        setCoachesFromDb(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("FETCH COACHES ERROR:", err);
-      }
-    };
-
-    loadCoaches();
-  }, []);
-
-  useEffect(() => {
-    const loadReferees = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/admin/referees", {
-          credentials: "include",
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Could not load referees:", text);
-          return;
-        }
-
-        const data = await res.json();
-        setRefereesFromDb(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("FETCH REFEREES ERROR:", err);
-      }
-    };
-
-    loadReferees();
-  }, []);
-
-  useEffect(() => {
-    const loadObservers = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/admin/observers", {
-          credentials: "include",
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Could not load observers:", text);
-          return;
-        }
-
-        const data = await res.json();
-        setObserversFromDb(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("FETCH OBSERVERS ERROR:", err);
-      }
-    };
-
-    loadObservers();
+    loadSetupData();
   }, []);
 
   useEffect(() => {
@@ -873,6 +909,36 @@ function MatchSetup() {
               ← Back
             </button>
           </div>
+
+          {setupDataError && (
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "12px 14px",
+                borderRadius: "14px",
+                background: "rgba(255, 77, 77, 0.14)",
+                color: "#ffb3b3",
+                fontWeight: 700,
+              }}
+            >
+              {setupDataError}
+            </div>
+          )}
+
+          {setupDataInfo && (
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "12px 14px",
+                borderRadius: "14px",
+                background: "rgba(60, 180, 120, 0.14)",
+                color: "#b9ffd8",
+                fontWeight: 700,
+              }}
+            >
+              {setupDataInfo}
+            </div>
+          )}
         </div>
 
         <div className="setup-layout">
