@@ -12,42 +12,42 @@ function PendingSync() {
 
   const loadCachedTeams = () => {
     try {
-        const rawTeams = localStorage.getItem("offlineTeams");
+      const rawTeams = localStorage.getItem("offlineTeams");
 
-        if (!rawTeams) {
+      if (!rawTeams) {
         setCachedTeams([]);
         return;
-        }
+      }
 
-        const parsedTeams = JSON.parse(rawTeams);
+      const parsedTeams = JSON.parse(rawTeams);
 
-        if (Array.isArray(parsedTeams)) {
+      if (Array.isArray(parsedTeams)) {
         setCachedTeams(parsedTeams);
-        } else {
+      } else {
         setCachedTeams([]);
-        }
+      }
     } catch (error) {
-        console.error("Could not load cached teams:", error);
-        setCachedTeams([]);
+      console.error("Could not load cached teams:", error);
+      setCachedTeams([]);
     }
-    };
+  };
 
-    const getTeamNameById = (teamId, fallbackName) => {
-        if (fallbackName) {
-            return fallbackName;
-        }
+  const getTeamNameById = (teamId, fallbackName) => {
+    if (fallbackName) {
+      return fallbackName;
+    }
 
-        const team = cachedTeams.find((cachedTeam) => {
-            const cachedTeamId =
-            cachedTeam.id ??
-            cachedTeam.teamId ??
-            cachedTeam.team_id;
+    const team = cachedTeams.find((cachedTeam) => {
+      const cachedTeamId =
+        cachedTeam.id ??
+        cachedTeam.teamId ??
+        cachedTeam.team_id;
 
-            return String(cachedTeamId) === String(teamId);
-        });
+      return String(cachedTeamId) === String(teamId);
+    });
 
-        return team?.name || team?.teamName || team?.shortName || "Unknown Team";
-        };
+    return team?.name || team?.teamName || team?.shortName || "Unknown Team";
+  };
 
   const loadPendingMatches = () => {
     const matches = getOfflineMatches().filter(
@@ -62,15 +62,17 @@ function PendingSync() {
     loadPendingMatches();
 
     const handleOnline = () => {
-        setIsOnline(true);
-        loadCachedTeams();
-        loadPendingMatches();
+      setIsOnline(true);
+      loadCachedTeams();
+      loadPendingMatches();
+      setMessage("You are online. Press Sync Now to synchronize pending matches.");
     };
 
     const handleOffline = () => {
-        setIsOnline(false);
-        loadCachedTeams();
-        loadPendingMatches();
+      setIsOnline(false);
+      loadCachedTeams();
+      loadPendingMatches();
+      setMessage("You are offline. Pending matches cannot be synchronized yet.");
     };
 
     window.addEventListener("online", handleOnline);
@@ -88,22 +90,36 @@ function PendingSync() {
       return;
     }
 
-    setIsSyncing(true);
-    setMessage("");
+    const pendingBeforeSync = getOfflineMatches().filter(
+      (match) => match.syncStatus === "PENDING"
+    );
 
-    const result = await syncPendingMatches();
-
-    loadPendingMatches();
-
-    if (result.syncedCount > 0) {
-      setMessage(`${result.syncedCount} offline match(es) synced successfully.`);
-    } else if (result.failedCount > 0) {
-      setMessage("Sync failed. Please make sure the backend is running.");
-    } else {
+    if (pendingBeforeSync.length === 0) {
       setMessage("There are no pending offline matches to sync.");
+      return;
     }
 
-    setIsSyncing(false);
+    try {
+      setIsSyncing(true);
+      setMessage("");
+
+      const result = await syncPendingMatches();
+
+      loadPendingMatches();
+
+      if (result.syncedCount > 0) {
+        setMessage(`${result.syncedCount} offline match(es) synced successfully.`);
+      } else if (result.failedCount > 0) {
+        setMessage("Sync failed. Please make sure the backend is running.");
+      } else {
+        setMessage("There are no pending offline matches to sync.");
+      }
+    } catch (error) {
+      console.error("Sync error:", error);
+      setMessage("Sync failed. Please make sure the backend is running.");
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const formatDate = (dateValue) => {
@@ -133,8 +149,8 @@ function PendingSync() {
           <div>
             <h1 className="section-title">Pending Sync</h1>
             <p className="section-subtitle" style={{ marginBottom: 0 }}>
-              Offline matches saved locally and waiting to be synchronized with
-              the database.
+              Offline matches saved locally. They will be synchronized with the
+              database only when you press Sync Now.
             </p>
           </div>
 
@@ -142,7 +158,7 @@ function PendingSync() {
             type="button"
             className="app-button"
             onClick={handleSyncNow}
-            disabled={isSyncing}
+            disabled={!isOnline || isSyncing}
           >
             {isSyncing ? "Syncing..." : "Sync Now"}
           </button>
@@ -210,8 +226,8 @@ function PendingSync() {
                 }}
               >
                 <h3 style={{ margin: 0 }}>
-                    {getTeamNameById(match.teamAId, match.teamAName)} vs{" "}
-                    {getTeamNameById(match.teamBId, match.teamBName)}
+                  {getTeamNameById(match.teamAId, match.teamAName)} vs{" "}
+                  {getTeamNameById(match.teamBId, match.teamBName)}
                 </h3>
 
                 <span

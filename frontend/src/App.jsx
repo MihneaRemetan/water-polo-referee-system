@@ -1,7 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { syncPendingMatches } from "./services/syncService";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import LiveMatch from "./pages/LiveMatch";
@@ -17,30 +14,6 @@ import Coaches from "./pages/Coaches";
 import PendingSync from "./pages/PendingSync";
 
 function App() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (navigator.onLine) {
-      console.log("Initial sync...");
-      syncPendingMatches(navigate);
-    }
-
-    const handleOnline = () => {
-      const pending = JSON.parse(localStorage.getItem("offlineMatches") || "[]")
-        .filter((m) => m.syncStatus === "PENDING").length;
-
-      console.log(`🌐 Back online → syncing ${pending} matches...`);
-
-      syncPendingMatches(navigate);
-    };
-
-    window.addEventListener("online", handleOnline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-    };
-  }, [navigate]);
-
   return (
     <Routes>
       <Route
@@ -141,8 +114,10 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
+
 export default App;

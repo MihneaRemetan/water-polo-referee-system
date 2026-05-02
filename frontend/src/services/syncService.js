@@ -1,6 +1,16 @@
 import { getOfflineMatches, clearOfflineMatch } from "./offlineMatchStore";
 
 export const syncPendingMatches = async () => {
+  if (!navigator.onLine) {
+    return {
+      syncedCount: 0,
+      failedCount: 0,
+      pendingCount: getOfflineMatches().filter(
+        (match) => match.syncStatus === "PENDING"
+      ).length,
+    };
+  }
+
   const matches = getOfflineMatches();
 
   if (!matches || matches.length === 0) {
@@ -31,17 +41,18 @@ export const syncPendingMatches = async () => {
         body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        clearOfflineMatch(localId);
-        syncedCount++;
-        console.log("Synced match:", localId);
-      } else {
+      if (!response.ok) {
         const text = await response.text();
         console.error("Sync failed:", response.status, text);
         failedCount++;
+        continue;
       }
+
+      clearOfflineMatch(localId);
+      syncedCount++;
+      console.log("Synced match:", localId);
     } catch (error) {
-      console.log("Still offline or backend unavailable:", error);
+      console.error("Backend unavailable or sync error:", error);
       failedCount++;
       break;
     }
