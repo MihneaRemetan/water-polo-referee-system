@@ -274,22 +274,6 @@ public class MatchService {
     public List<MatchHistoryDto> getMatchHistory() {
         return matchRepository.findAllWithTeams().stream()
                 .map(match -> {
-                    Integer scoreA = match.getScoreA();
-                    Integer scoreB = match.getScoreB();
-
-                    // fallback dacă sunt null
-                    int safeScoreA = scoreA != null ? scoreA : 0;
-                    int safeScoreB = scoreB != null ? scoreB : 0;
-
-                    String winner;
-                    if (safeScoreA > safeScoreB) {
-                        winner = match.getTeamA().getName();
-                    } else if (safeScoreB > safeScoreA) {
-                        winner = match.getTeamB().getName();
-                    } else {
-                        winner = "Draw";
-                    }
-
                     return new MatchHistoryDto(
                         match.getId(),
                         match.getTeamA().getName(),
