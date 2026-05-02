@@ -14,6 +14,7 @@ import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PlayersPage from "./pages/PlayersPage";
 import Coaches from "./pages/Coaches";
+import PendingSync from "./pages/PendingSync";
 
 function App() {
   const navigate = useNavigate();
@@ -132,6 +133,14 @@ function App() {
         }
       />
 
+      <Route
+        path="/pending-sync"
+        element={
+          <ProtectedRoute>
+            <PendingSync />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

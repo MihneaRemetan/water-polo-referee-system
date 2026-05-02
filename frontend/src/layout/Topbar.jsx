@@ -1,6 +1,7 @@
 //logo + linkuri pagini + avatar utilizator + meniu logout
 import { Link, useLocation, useNavigate } from "react-router-dom"; //asa stiu pe ce pagina sunt, sa stie ce link sa activeze
 import { useEffect, useRef, useState } from "react";
+import { getOfflineMatches } from "../services/offlineMatchStore";
 import logo from "../assets/frp-logo.png";
 
 function Topbar() {
@@ -8,6 +9,7 @@ function Topbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
   //datele user-ului din browser
   const userName = localStorage.getItem("userName") || "User";
@@ -24,6 +26,7 @@ function Topbar() {
     { label: "Players", path: "/players" },
     { label: "Matches", path: "/history" },
     { label: "Coaches", path: "/coaches" },
+    { label: "Pending Sync", path: "/pending-sync" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -38,6 +41,31 @@ function Topbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const updatePendingSyncCount = () => {
+      const pendingCount = getOfflineMatches().filter(
+        (match) => match.syncStatus === "PENDING"
+      ).length;
+
+      setPendingSyncCount(pendingCount);
+    };
+
+    updatePendingSyncCount();
+
+    window.addEventListener("storage", updatePendingSyncCount);
+    window.addEventListener("online", updatePendingSyncCount);
+    window.addEventListener("offline", updatePendingSyncCount);
+
+    const intervalId = setInterval(updatePendingSyncCount, 1000);
+
+    return () => {
+      window.removeEventListener("storage", updatePendingSyncCount);
+      window.removeEventListener("online", updatePendingSyncCount);
+      window.removeEventListener("offline", updatePendingSyncCount);
+      clearInterval(intervalId);
     };
   }, []);
 
@@ -57,14 +85,30 @@ function Topbar() {
 
           <nav className="topbar-nav">
             {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`topbar-link ${isActive(item.path) ? "active" : ""}`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`topbar-link ${isActive(item.path) ? "active" : ""}`}
+            >
+              {item.label}
+
+              {item.path === "/pending-sync" && pendingSyncCount > 0 && (
+                <span
+                  style={{
+                    marginLeft: "6px",
+                    padding: "2px 7px",
+                    borderRadius: "999px",
+                    background: "#ffb84d",
+                    color: "#101820",
+                    fontSize: "12px",
+                    fontWeight: 900,
+                  }}
+                >
+                  {pendingSyncCount}
+                </span>
+              )}
+            </Link>
+          ))}
           </nav>
         </div>
 
