@@ -93,9 +93,6 @@ INSERT INTO referee (id, name, city, gender, referee_rank, password) VALUES
 (71, 'LAZAR VIOREL', 'FOCSANI', 'Masculin', 'National (CJ/I)', 'FOC_71'),
 (72, 'LAZAR MIRELA', 'FOCSANI', 'Feminin', 'National (CJ/I)', 'FOC_72');
 
-INSERT INTO referee (id, name, city, gender, referee_rank, password) VALUES
-(100, 'TEST USER', 'BUCURESTI', 'Masculin', 'Admin/Test', 'Frp_2026_Secure_9X!');
-
 DROP TABLE IF EXISTS observer;
 CREATE TABLE observer (
     id INT PRIMARY KEY,

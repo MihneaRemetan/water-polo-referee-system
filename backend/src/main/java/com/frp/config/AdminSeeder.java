@@ -17,20 +17,23 @@ import java.util.List;
 @Configuration
 public class AdminSeeder {
 
+    private static final String ADMIN_USER_ID = "frp.admin";
+    private static final String ADMIN_PASSWORD = "FrpAdmin_2026!Secure";
+
     @Bean
     public CommandLineRunner seedUsers(UserRepository userRepository,
                                        RefereeRepository refereeRepository,
                                        ObserverRepository observerRepository,
                                        PasswordEncoder passwordEncoder) {
         return args -> {
-            if (!userRepository.existsByUserId("admin")) {
+            if (!userRepository.existsByUserId(ADMIN_USER_ID)) {
                 User admin = new User();
-                admin.setUserId("admin");
-                admin.setPassword(passwordEncoder.encode("admin"));
+                admin.setUserId(ADMIN_USER_ID);
+                admin.setPassword(passwordEncoder.encode(ADMIN_PASSWORD));
                 admin.setRole(Role.ADMIN);
 
                 userRepository.save(admin);
-                System.out.println("Admin created: userId=admin / password=admin");
+                System.out.println("Admin created: userId=" + ADMIN_USER_ID);
             }
 
             List<Referee> referees = refereeRepository.findAll();
