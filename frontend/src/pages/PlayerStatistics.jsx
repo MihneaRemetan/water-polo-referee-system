@@ -4,11 +4,17 @@ import "../styles/PlayerStatistics.css";
 
 function PlayerStatistics() {
   const [players, setPlayers] = useState([]);
+  const [standings, setStandings] = useState([]);
+
   const [searchName, setSearchName] = useState("");
   const [searchTeam, setSearchTeam] = useState("");
   const [searchPlayerNumber, setSearchPlayerNumber] = useState("");
+
   const [loading, setLoading] = useState(true);
+  const [standingsLoading, setStandingsLoading] = useState(true);
+
   const [error, setError] = useState("");
+  const [standingsError, setStandingsError] = useState("");
 
   const fetchStatistics = async (name = "", team = "", playerNumber = "") => {
     try {
@@ -53,8 +59,34 @@ function PlayerStatistics() {
     }
   };
 
+  const fetchStandings = async () => {
+    try {
+      setStandingsLoading(true);
+      setStandingsError("");
+
+      const response = await fetch("http://localhost:8080/api/matches/standings", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not load team standings.");
+      }
+
+      const data = await response.json();
+      setStandings(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error fetching team standings:", err);
+      setStandingsError("Could not load team standings.");
+      setStandings([]);
+    } finally {
+      setStandingsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchStatistics();
+    fetchStandings();
   }, []);
 
   const handleSearch = (e) => {
@@ -186,15 +218,73 @@ function PlayerStatistics() {
                         {player.playerName || "Unknown Player"}
                       </div>
                       <div className="top-scorer-meta">
-                        Team: {player.team || "-"} · No: {player.playerNumber ?? "-"}
+                        Team: {player.team || "-"} · No:{" "}
+                        {player.playerNumber ?? "-"}
                       </div>
                     </div>
-                    <div className="top-scorer-goals">{player.totalGoals} G</div>
+                    <div className="top-scorer-goals">
+                      {player.totalGoals ?? 0} G
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
+        </div>
+
+        <div className="panel live-card" style={{ marginTop: "20px" }}>
+          <div className="live-card-header">
+            <div>
+              <h2 className="live-card-title">Team Standings</h2>
+              <p className="live-card-subtitle">
+                Ranking based on wins, draws, losses, goal difference, and points.
+              </p>
+            </div>
+          </div>
+
+          {standingsLoading ? (
+            <div className="statistics-empty">Loading team standings...</div>
+          ) : standingsError ? (
+            <div className="statistics-error">{standingsError}</div>
+          ) : standings.length === 0 ? (
+            <div className="statistics-empty">No team standings available yet.</div>
+          ) : (
+            <div className="statistics-table-wrapper">
+              <table className="statistics-table standings-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Team</th>
+                    <th>Matches Played</th>
+                    <th>Wins</th>
+                    <th>Draws</th>
+                    <th>Losses</th>
+                    <th>Goal Difference</th>
+                    <th>Points</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {standings.map((team, index) => (
+                    <tr key={`${team.teamName}-${index}`}>
+                      <td>{index + 1}</td>
+                      <td>{team.teamName || "-"}</td>
+                      <td>{team.matchesPlayed ?? 0}</td>
+                      <td>{team.wins ?? 0}</td>
+                      <td>{team.draws ?? 0}</td>
+                      <td>{team.losses ?? 0}</td>
+                      <td>
+                        {(team.goalDifference ?? 0) > 0
+                          ? `+${team.goalDifference}`
+                          : team.goalDifference ?? 0}
+                      </td>
+                      <td>{team.points ?? 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         <div className="panel live-card" style={{ marginTop: "20px" }}>
@@ -231,6 +321,7 @@ function PlayerStatistics() {
                     <th>Fouls / Match</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {players.map((player, index) => (
                     <tr

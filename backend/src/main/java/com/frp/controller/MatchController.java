@@ -3,6 +3,7 @@ package com.frp.controller;
 import com.frp.dto.MatchDetailsDto;
 import com.frp.dto.MatchHistoryDto;
 import com.frp.dto.SaveMatchRequest;
+import com.frp.dto.TeamStandingDto;
 import com.frp.model.Match;
 import com.frp.service.MatchService;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +28,19 @@ public class MatchController {
         return ResponseEntity.ok(matchService.getMatchHistory());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<MatchDetailsDto> getMatchById(@PathVariable Long id) {
-        return ResponseEntity.ok(matchService.getMatchDetails(id));
-    }
-
     @GetMapping("/history")
     public ResponseEntity<List<MatchHistoryDto>> getMatchHistory() {
         return ResponseEntity.ok(matchService.getMatchHistory());
+    }
+
+    @GetMapping("/standings")
+    public ResponseEntity<List<TeamStandingDto>> getTeamStandings() {
+        return ResponseEntity.ok(matchService.getTeamStandings());
+    }
+
+    @GetMapping("/{id:\\d+}")
+    public ResponseEntity<MatchDetailsDto> getMatchById(@PathVariable Long id) {
+        return ResponseEntity.ok(matchService.getMatchDetails(id));
     }
 
     @PostMapping

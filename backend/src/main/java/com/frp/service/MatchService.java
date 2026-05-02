@@ -13,6 +13,7 @@ import com.frp.model.Team;
 import com.frp.repository.MatchPlayerStatRepository;
 import com.frp.repository.MatchRepository;
 import com.frp.repository.TeamRepository;
+import com.frp.dto.TeamStandingDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 @Service
 public class MatchService {
@@ -303,4 +306,56 @@ public class MatchService {
                 })
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+        public List<TeamStandingDto> getTeamStandings() {
+            List<Team> teams = teamRepository.findAll();
+            List<Match> matches = matchRepository.findAll();
+
+            Map<String, TeamStandingDto> standings = new HashMap<>();
+
+            for (Team team : teams) {
+                standings.put(team.getName(), new TeamStandingDto(team.getName()));
+            }
+
+            for (Match match : matches) {
+                if (match.getTeamA() == null || match.getTeamB() == null) {
+                    continue;
+                }
+
+                String teamAName = match.getTeamA().getName();
+                String teamBName = match.getTeamB().getName();
+
+                int scoreA = match.getScoreA();
+                int scoreB = match.getScoreB();
+
+                TeamStandingDto teamAStanding = standings.get(teamAName);
+                TeamStandingDto teamBStanding = standings.get(teamBName);
+
+                if (teamAStanding == null || teamBStanding == null) {
+                    continue;
+                }
+
+                if (scoreA > scoreB) {
+                    teamAStanding.addWin(scoreA, scoreB);
+                    teamBStanding.addLoss(scoreB, scoreA);
+                } else if (scoreA < scoreB) {
+                    teamAStanding.addLoss(scoreA, scoreB);
+                    teamBStanding.addWin(scoreB, scoreA);
+                } else {
+                    teamAStanding.addDraw(scoreA, scoreB);
+                    teamBStanding.addDraw(scoreB, scoreA);
+                }
+            }
+
+            return standings.values()
+                    .stream()
+                    .sorted(
+                            Comparator.comparingInt(TeamStandingDto::getPoints).reversed()
+                                    .thenComparing(Comparator.comparingInt(TeamStandingDto::getGoalDifference).reversed())
+                                    .thenComparing(Comparator.comparingInt(TeamStandingDto::getWins).reversed())
+                                    .thenComparing(TeamStandingDto::getTeamName)
+                    )
+                    .collect(Collectors.toList());
+        }
 }
