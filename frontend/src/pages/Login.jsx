@@ -21,7 +21,7 @@ function Login() {
     }
   }, []);
 
-  const saveLoggedUser = (loginData, meData, cleanId) => {
+  const saveLoggedUser = (loginData, meData, cleanId, cleanPassword) => {
     const loggedUserName =
       meData?.userName ||
       meData?.name ||
@@ -54,12 +54,24 @@ function Login() {
     localStorage.setItem("userName", String(loggedUserName));
     localStorage.setItem("userRole", String(loggedUserRole));
     localStorage.setItem("userId", String(loggedUserId));
+
     localStorage.setItem("offlineLoginAllowed", "true");
+
+    localStorage.setItem(
+      "offlineUser",
+      JSON.stringify({
+        userId: String(loggedUserId),
+        userName: String(loggedUserName),
+        userRole: String(loggedUserRole),
+        password: String(cleanPassword),
+      })
+    );
 
     console.log("SAVED USER:", {
       userName: localStorage.getItem("userName"),
       userRole: localStorage.getItem("userRole"),
       userId: localStorage.getItem("userId"),
+      offlineUser: localStorage.getItem("offlineUser"),
     });
   };
 
@@ -77,21 +89,33 @@ function Login() {
     }
 
     // OFFLINE LOGIN
-    if (!navigator.onLine) {
-      const userId = localStorage.getItem("userId");
-      const userName = localStorage.getItem("userName");
-      const userRole = localStorage.getItem("userRole");
-      const offlineAllowed = localStorage.getItem("offlineLoginAllowed");
+  if (!navigator.onLine) {
+    const offlineAllowed = localStorage.getItem("offlineLoginAllowed");
+    const offlineUserRaw = localStorage.getItem("offlineUser");
 
-      if (offlineAllowed === "true" && userId && userName && userRole) {
-        setInfoMessage("Offline mode: using cached session.");
-        navigate("/match-setup");
-        return;
-      }
-
+    if (offlineAllowed !== "true" || !offlineUserRaw) {
       setError("Login failed. No internet and no cached session.");
       return;
     }
+
+    const offlineUser = JSON.parse(offlineUserRaw);
+
+    if (
+      offlineUser.userId === cleanId &&
+      offlineUser.password === cleanPassword
+    ) {
+      localStorage.setItem("userId", offlineUser.userId);
+      localStorage.setItem("userName", offlineUser.userName);
+      localStorage.setItem("userRole", offlineUser.userRole);
+
+      setInfoMessage("Offline login successful.");
+      navigate("/match-setup");
+      return;
+    }
+
+    setError("Login failed. Invalid offline credentials.");
+    return;
+  }
 
     // ONLINE LOGIN
     try {
@@ -143,7 +167,7 @@ function Login() {
 
       console.log("ME RESPONSE:", meData);
 
-      saveLoggedUser(loginData, meData, cleanId);
+      saveLoggedUser(loginData, meData, cleanId, cleanPassword);
 
       if (rememberMe) {
         localStorage.setItem("rememberedOfficialId", cleanId);
@@ -155,18 +179,30 @@ function Login() {
     } catch (error) {
       console.error("Login failed:", error);
 
-      const userId = localStorage.getItem("userId");
-      const userName = localStorage.getItem("userName");
-      const userRole = localStorage.getItem("userRole");
       const offlineAllowed = localStorage.getItem("offlineLoginAllowed");
+        const offlineUserRaw = localStorage.getItem("offlineUser");
 
-      if (offlineAllowed === "true" && userId && userName && userRole) {
-        setInfoMessage("Offline mode: using cached session.");
-        navigate("/match-setup");
-        return;
-      }
+        if (offlineAllowed === "true" && offlineUserRaw) {
+          const offlineUser = JSON.parse(offlineUserRaw);
 
-      setError("Login failed. No internet and no cached session.");
+          if (
+            offlineUser.userId === cleanId &&
+            offlineUser.password === cleanPassword
+          ) {
+            localStorage.setItem("userId", offlineUser.userId);
+            localStorage.setItem("userName", offlineUser.userName);
+            localStorage.setItem("userRole", offlineUser.userRole);
+
+            setInfoMessage("Offline login successful.");
+            navigate("/match-setup");
+            return;
+          }
+
+          setError("Login failed. Invalid offline credentials.");
+          return;
+        }
+
+        setError("Login failed. No internet and no cached session.");
     }
   };
 
