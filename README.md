@@ -1,110 +1,201 @@
 # Water Polo Referee System
 
-A full-stack web application designed to support the management and monitoring of water polo matches.  
-The platform helps officials organize matches, manage competition data, run live match sessions, record events, and review saved match history and player statistics.
+A full-stack web application designed to support the management, monitoring, and administration of water polo matches.
 
-## Overview
-
-The **Water Polo Referee System** is built as a federation-style digital platform for match administration and live officiating support.
-
-It includes:
-- a **React + Vite frontend** for the user interface
-- a **Spring Boot backend** exposing REST APIs
-- a **MySQL database** for persistent storage of teams, players, coaches, officials, matches, events, and statistics
-
-The goal of the project is to provide a centralized system where referees, observers, and administrators can work with match data in a structured and efficient way.
+The platform provides tools for referees, observers, and administrators to manage competitions, officiate live matches, record events, and analyze historical statistics through a centralized digital system.
 
 ---
 
-## Main Features
+## Features
 
-### Authentication and role-based access
-- Login system for officials
+### Authentication & Authorization
+
+- Secure login system
 - Session-based authentication
-- Role separation for:
+- Role-based access control:
   - **ADMIN**
   - **REFEREE**
   - **OBSERVER**
 
-### Match management
-- Create and save matches
-- Configure teams and match details
-- Store:
-  - team assignments
-  - score
-  - period
-  - shot clock
-  - referees and officials
-  - championship details
-  - location and date
+### Match Management
 
-### Live match workflow
-- Start and run a live match session
-- Track important in-game information
-- Record match events and player statistics
+- Create and configure matches
+- Assign teams and officials
+- Store championship information
+- Manage match location and scheduling
+- Save complete match records
 
-### Administration module
-- Manage referees
-- Manage observers
-- Control official access data
+### Live Match Operations
 
-### Team and player management
-- View teams
-- Add, update, and delete teams
-- View players
-- Add, update, and delete players
-- Automatically generate player codes when needed
-- View coaches by team
+- Run live match sessions
+- Track score and game period
+- Manage shot clock
+- Record match events in real time
+- Generate player statistics during gameplay
 
-### Match history and statistics
-- View saved matches
-- Review past match details
+### Administration Module
+
+- Manage referee accounts
+- Manage observer accounts
+- Control user permissions and access
+
+### Team & Player Management
+
+- Create, update, and delete teams
+- Create, update, and delete players
+- Manage coaches and team rosters
+- Automatic player code generation
+
+### Statistics & Match History
+
+- Browse previously played matches
+- Review detailed match information
 - Access aggregated player statistics
-- Filter statistics by name, team, or player number
+- Filter data by player, team, or jersey number
+
+---
+
+## System Architecture
+
+```text
+Frontend (React + Vite)
+        │
+        ▼
+REST API (Spring Boot)
+        │
+        ▼
+     MySQL
+```
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- **React**
-- **Vite**
-- **React Router DOM**
-- **CSS**
+
+- React
+- Vite
+- React Router DOM
+- CSS
 
 ### Backend
-- **Java 17**
-- **Spring Boot**
-- **Spring Web**
-- **Spring Data JPA**
-- **Spring Security**
-- **Spring Validation**
-- **Lombok**
+
+- Java 17
+- Spring Boot
+- Spring Web
+- Spring Security
+- Spring Data JPA
+- Bean Validation
+- Lombok
 
 ### Database
-- **MySQL**
+
+- MySQL
+
+### DevOps
+
+- Docker
+- Docker Compose
 
 ---
 
 ## Screenshots
 
-The following screenshots present the main pages and workflows of the application.
-
 ### Login Page
-![Login Page](docs/screenshots/login.png)
+
+<p align="center">
+  <img src="docs/screenshots/login.png" width="750">
+</p>
 
 ### Home Page
-![Home Page](docs/screenshots/home.png)
+
+<p align="center">
+  <img src="docs/screenshots/home.png" width="750">
+</p>
 
 ### Match Setup
-![Match Setup](docs/screenshots/match-setup.png)
+
+<p align="center">
+  <img src="docs/screenshots/match-setup.png" width="750">
+</p>
 
 ### Live Match
-![Live Match](docs/screenshots/live-match.png)
+
+<p align="center">
+  <img src="docs/screenshots/live-match.png" width="750">
+</p>
+
+---
+
+## Running the Project
+
+### Using Docker
+
+```bash
+docker compose up --build
+```
+
+The application starts:
+- MySQL database
+- Spring Boot backend
+- React frontend
+
+### Manual Setup
+
+#### Backend
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+#### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
 
 ## Project Structure
 
 ```bash
 water-polo-referee-system/
-├── backend/      # Spring Boot backend
-└── frontend/     # React frontend
+│
+├── backend/
+│   ├── controller/
+│   ├── service/
+│   ├── repository/
+│   ├── model/
+│   ├── dto/
+│   └── config/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── styles/
+│
+├── docs/
+│   └── screenshots/
+│
+├── docker-compose.yml
+│
+└── README.md
+```
+
+---
+
+## Future Improvements
+
+- Competition management module
+- Observer evaluation reports
+- Export statistics to PDF or Excel
+- Responsive mobile interface
+- Advanced analytics dashboard
+- Cloud deployment
+
+---
