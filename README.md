@@ -1,5 +1,11 @@
 # Water Polo Referee System
 
+![Java](https://img.shields.io/badge/Java-17-orange)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green)
+![React](https://img.shields.io/badge/React-19-blue)
+![MySQL](https://img.shields.io/badge/MySQL-Database-blue)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED)
+
 A full-stack web application designed to support the management, monitoring, and administration of water polo matches.
 
 The platform provides tools for referees, observers, and administrators to manage competitions, officiate live matches, record events, and analyze historical statistics through a centralized digital system.
