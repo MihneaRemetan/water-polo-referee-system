@@ -1,11 +1,11 @@
 # Water Polo Referee System
 
-## Built With
-
-**Frontend:** React, Vite, React Router DOM, CSS  
-**Backend:** Java 17, Spring Boot, Spring Web, Spring Security, Spring Data JPA  
-**Database:** MySQL  
-**Containerization:** Docker, Docker Compose
+| Layer | Technologies |
+|---|---|
+| Frontend | React, Vite, React Router DOM, CSS |
+| Backend | Java 17, Spring Boot, Spring Web, Spring Security, Spring Data JPA |
+| Database | MySQL |
+| DevOps | Docker, Docker Compose |
 
 A full-stack web application designed to support the management, monitoring, and administration of water polo matches.
 
