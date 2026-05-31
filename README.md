@@ -104,7 +104,7 @@ REST API (Spring Boot)
 ### Login Page
 
 <p align="center">
-  <img src="docs/screenshots/login.png" width="750">
+  <img src="docs/screenshots/login.png" width="500">
 </p>
 
 ### Home Page
