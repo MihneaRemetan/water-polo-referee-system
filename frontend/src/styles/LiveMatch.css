@@ -1,5 +1,3 @@
-/* LIVE MATCH */
-
 .live-match-layout {
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr) 340px;
@@ -37,8 +35,6 @@
   gap: 12px;
   align-items: center;
 }
-
-/* POSSESSION */
 
 .possession-grid {
   display: grid;

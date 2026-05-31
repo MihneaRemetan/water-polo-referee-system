@@ -1,0 +1,13 @@
+pornire aplicatie               -> docker compose up
+pornire + rebuild               -> docker compose up --build
+oprire aplicatie                -> docker compose down
+oprire + reset database         -> docker compose down -v
+vizualizare containere active   -> docker ps
+vizualizare log-uri backend     -> docker logs -f water-polo-backend
+vizualizare log-uri frontend    -> docker logs -f water-polo-frontend
+vizualizare log-uri MySQL       -> docker logs -f water-polo-mysql
+
+Adrese utile:
+frontend -> http://localhost:5173
+backend  -> http://localhost:8080
+MySQL    -> localhost:3307

@@ -1,4 +1,24 @@
-/* APP CORE */
+@import "./Common.css";
+
+@import "./Topbar.css";
+
+@import "./AdminPage.css";
+@import "./Coaches.css";
+@import "./Home.css";
+@import "./LiveMatch.css";
+@import "./Login.css";
+@import "./MatchDetails.css";
+@import "./MatchHistory.css";
+@import "./MatchSetup.css";
+@import "./PlayerStatistics.css";
+@import "./PlayersPage.css";
+
+@import "./EventList.css";
+@import "./PlayerFouls.css";
+@import "./ScoreBoard.css";
+@import "./Timer.css";
+@import "./ShotClock.css";
+
 main.app-shell {
   min-height: calc(100vh - 92px);
   padding: 24px;
@@ -9,31 +29,6 @@ main.app-shell {
   max-width: 1600px;
   margin: 0 auto;
 }
-
-/* LOAD SHARED STYLES */
-@import "./styles/Common.css";
-
-/* LOAD LAYOUT STYLES */
-@import "./styles/Topbar.css";
-
-/* LOAD PAGE STYLES */
-@import "./styles/AdminPage.css";
-@import "./styles/Coaches.css";
-@import "./styles/Home.css";
-@import "./styles/LiveMatch.css";
-@import "./styles/Login.css";
-@import "./styles/MatchDetails.css";
-@import "./styles/MatchHistory.css";
-@import "./styles/MatchSetup.css";
-@import "./styles/PlayerStatistics.css";
-@import "./styles/PlayersPage.css";
-
-/* LOAD COMPONENT STYLES */
-@import "./styles/EventList.css";
-@import "./styles/PlayerFouls.css";
-@import "./styles/ScoreBoard.css";
-@import "./styles/Timer.css";
-@import "./styles/ShotClock.css";
 
 @media (max-width: 900px) {
   main.app-shell {
