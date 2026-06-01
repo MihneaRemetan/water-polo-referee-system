@@ -9,11 +9,11 @@ import java.util.List;
 public interface MatchRepository extends JpaRepository<Match, Long> {
 
     @Query("""
-        SELECT m
-        FROM Match m
-        JOIN FETCH m.teamA
-        JOIN FETCH m.teamB
-        ORDER BY m.id DESC
+    SELECT m
+    FROM Match m
+    LEFT JOIN FETCH m.teamA
+    LEFT JOIN FETCH m.teamB
+    ORDER BY m.id DESC
     """)
     List<Match> findAllWithTeams();
 }

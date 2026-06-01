@@ -15,5 +15,16 @@ MySQL    -> localhost:3307
 docker compose down -v
 docker compose up --build
 
+docker compose up
 docker stop water-polo-backend
 docker compose start backend
+
+SELECT
+    id,
+    team_a_id,
+    team_b_id,
+    scorea,
+    scoreb,
+    status
+FROM matches
+ORDER BY id;

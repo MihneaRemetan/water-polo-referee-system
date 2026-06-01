@@ -277,8 +277,8 @@ public class MatchService {
                 .map(match -> {
                     return new MatchHistoryDto(
                         match.getId(),
-                        match.getTeamA().getName(),
-                        match.getTeamB().getName(),
+                        match.getTeamA() != null ? match.getTeamA().getName() : "N/A",
+                        match.getTeamB() != null ? match.getTeamB().getName() : "N/A",
                         match.getScoreA(),
                         match.getScoreB(),
                         match.getPeriod(),

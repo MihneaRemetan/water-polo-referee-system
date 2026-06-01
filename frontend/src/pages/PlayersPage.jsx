@@ -23,7 +23,7 @@ function PlayersPage() {
 
   const role = localStorage.getItem("userRole");
   const isAdmin = role === "ADMIN";
-  const canEdit = role === "ADMIN" || role === "REFEREE" || role === "OBSERVER";
+  const canEdit = isAdmin;
 
   useEffect(() => {
     loadData();
@@ -223,8 +223,7 @@ function PlayersPage() {
             <p className="players-eyebrow">Squad management</p>
             <h1>Players</h1>
             <p className="players-subtitle">
-              Manage the player database. The admin can add and delete players,
-              while the other officials can only edit.
+              Manage the player database. Only admins can add, edit, and delete players.
             </p>
           </div>
 
