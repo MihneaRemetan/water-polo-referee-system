@@ -252,7 +252,7 @@ function Coaches() {
                       name="city"
                       value={form.city}
                       onChange={handleFormChange}
-                      placeholder="Ex: Bucuresti"
+                      placeholder="Ex: București"
                     />
                   </div>
 

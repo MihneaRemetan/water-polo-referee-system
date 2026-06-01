@@ -44,8 +44,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers("/api/teams/**").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
-                        .requestMatchers(HttpMethod.POST, "/api/matches/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
+                        .requestMatchers(HttpMethod.GET, "/api/matches", "/api/matches/**")
+                        .hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/matches", "/api/matches/**")
+                        .hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
 
                         .requestMatchers(HttpMethod.GET, "/api/admin/**").hasAnyRole("ADMIN", "REFEREE", "OBSERVER")
                         .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")

@@ -254,7 +254,6 @@ public class MatchService {
             return e;
         }).toList());
 
-        // PLAYER STATS (fix corect pentru modelul tău)
         dto.setPlayerStats(match.getPlayerStats().stream().map(stat -> {
             PlayerStatisticsDto s = new PlayerStatisticsDto();
 
